@@ -24,19 +24,6 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-// Conditional imports - only if files exist
-let AIChatbot, Calendar;
-try {
-  AIChatbot = require('../components/AIChatbot').default;
-} catch (e) {
-  console.log('AIChatbot not found');
-}
-try {
-  Calendar = require('../components/Calendar').default;
-} catch (e) {
-  console.log('Calendar not found');
-}
-
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
@@ -100,23 +87,6 @@ export default function Dashboard() {
     }
   }
 
-  async function addHabitFromAI(habitName) {
-    try {
-      const habitData = {
-        name: habitName,
-        userId: currentUser.uid,
-        completedDates: [],
-        streak: 0,
-        createdAt: new Date().toISOString()
-      };
-
-      const docRef = await addDoc(collection(db, 'habits'), habitData);
-      setHabits([{ id: docRef.id, ...habitData }, ...habits]);
-    } catch (error) {
-      console.error('Error adding habit from AI:', error);
-    }
-  }
-
   async function toggleHabit(habit) {
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = habit.completedDates?.includes(today);
@@ -152,7 +122,7 @@ export default function Dashboard() {
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
     
-    const sorted = dates.sort().reverse();
+    const sorted = [...dates].sort().reverse();
     let streak = 0;
     const today = new Date();
     
@@ -208,7 +178,7 @@ export default function Dashboard() {
 
   return (
     <div className="black-bg">
-      <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '4rem' }}>
+      <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -239,7 +209,7 @@ export default function Dashboard() {
                   Your Pulse
                 </h1>
                 <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-                  {currentUser.email}
+                  {currentUser?.email}
                 </p>
               </div>
             </div>
@@ -275,17 +245,6 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-
-        {/* Calendar - Only render if component exists */}
-        {Calendar && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Calendar habits={habits} />
-          </motion.div>
-        )}
 
         {/* Add Habit Button */}
         <motion.div
@@ -436,14 +395,6 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
       </div>
-
-      {/* AI Chatbot - Only render if component exists */}
-      {AIChatbot && (
-        <AIChatbot 
-          currentHabits={habits.map(h => h.name)}
-          onAddHabit={addHabitFromAI}
-        />
-      )}
     </div>
   );
 }
