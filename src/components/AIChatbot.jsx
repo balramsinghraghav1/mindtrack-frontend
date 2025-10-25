@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, X, Sparkles } from 'lucide-react';
 
-const GEMINI_API_KEY = 'AIzaSyAYp00KLVJ0UQUkH6gMDvnn7qui7A-2C-U'; 
+const GEMINI_API_KEY = 'AIzaSyAwAYDFimuqbnv8IMc1YRo4yDKjhEtUlPs';
 
 export default function AIChatbot({ currentHabits, onAddHabit }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm your Pulse AI assistant. I can help you find habits that sync with your bio rhythm. What are your wellness goals?"
+      content: "Hi! I'm your Pulse AI assistant. 🌊 I can help you find habits that sync with your bio rhythm. What are your wellness goals?"
     }
   ]);
   const [input, setInput] = useState('');
@@ -57,7 +57,8 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
       );
 
       const data = await response.json();
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+                         "I'm having trouble connecting. Try asking about habit suggestions for sleep, energy, or focus!";
 
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
@@ -72,7 +73,6 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
   }
 
   function extractHabitFromMessage(message) {
-    // Look for patterns like "I recommend: X" or suggest X
     const patterns = [
       /I recommend:?\s*([^.!?\n]+)/i,
       /suggest:?\s*([^.!?\n]+)/i,
@@ -132,7 +132,9 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
               bottom: '2rem',
               right: '2rem',
               width: '380px',
+              maxWidth: 'calc(100vw - 2rem)',
               height: '550px',
+              maxHeight: 'calc(100vh - 4rem)',
               background: '#141414',
               borderRadius: '20px',
               border: '1px solid rgba(147, 51, 234, 0.3)',
@@ -164,6 +166,7 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
+                type="button"
                 style={{
                   background: 'rgba(255, 255, 255, 0.2)',
                   border: 'none',
@@ -222,6 +225,7 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
                           content: `✅ Added "${habit}" to your habits!`
                         }]);
                       }}
+                      type="button"
                       style={{
                         marginTop: '0.5rem',
                         padding: '6px 12px',
@@ -306,4 +310,7 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
             </form>
           </motion.div>
         )}
-      </AnimatePres
+      </AnimatePresence>
+    </>
+  );
+}
