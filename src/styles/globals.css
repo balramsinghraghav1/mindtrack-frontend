@@ -1,26 +1,20 @@
-/* Water-Themed iPhone-like Design System */
+/* Sexy Black UI - Pulse Theme */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Water Color Palette */
-  --water-blue: #0066FF;
-  --water-light: #4D9FFF;
-  --water-dark: #0047B3;
-  --ocean-deep: #001F3F;
-  --foam-white: #F0F9FF;
-  --wave-teal: #00C9A7;
-  --bubble-cyan: #7DD3FC;
-  
-  /* Glass Morphism */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  
-  /* Gradients */
-  --water-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --ocean-gradient: linear-gradient(to bottom, #0066FF, #00C9A7);
-  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  /* Sexy Black Palette */
+  --black-bg: #0a0a0a;
+  --black-card: #141414;
+  --black-lighter: #1a1a1a;
+  --neon-purple: #9333ea;
+  --neon-pink: #ec4899;
+  --neon-cyan: #06b6d4;
+  --neon-green: #10b981;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --glow-purple: rgba(147, 51, 234, 0.5);
+  --glow-pink: rgba(236, 72, 153, 0.5);
 }
 
 * {
@@ -31,73 +25,93 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--black-bg);
   min-height: 100vh;
-  color: white;
+  color: var(--text-primary);
   overflow-x: hidden;
 }
 
-/* Animated Water Background */
-.water-bg {
+/* Animated Grid Background */
+.black-bg {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--black-bg);
   overflow-x: hidden;
 }
 
-.water-bg::before {
+.black-bg::before {
   content: '';
   position: fixed;
-  width: 200%;
-  height: 200%;
-  top: -50%;
-  left: -50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(147, 51, 234, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(147, 51, 234, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
-  animation: water-flow 20s linear infinite;
   z-index: 0;
   pointer-events: none;
 }
 
-@keyframes water-flow {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
+.black-bg::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+  animation: rotate-glow 20s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes rotate-glow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Glass Card Effect */
 .glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+  background: var(--black-card);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(147, 51, 234, 0.2);
   padding: 2rem;
   transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .glass-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+  border-color: rgba(147, 51, 234, 0.4);
+  box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+  transform: translateY(-2px);
 }
 
-/* Water Button */
-.water-button {
-  background: linear-gradient(135deg, #0066FF, #00C9A7);
+.glass-card * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Neon Button */
+.neon-button {
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
   border: none;
-  border-radius: 15px;
+  border-radius: 12px;
   padding: 12px 28px;
   color: white;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+  box-shadow: 0 4px 15px var(--glow-purple);
   position: relative;
   overflow: hidden;
 }
 
-.water-button::before {
+.neon-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -108,68 +122,81 @@ body {
   transition: left 0.5s;
 }
 
-.water-button:hover::before {
+.neon-button:hover::before {
   left: 100%;
 }
 
-.water-button:hover {
+.neon-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.5);
+  box-shadow: 0 6px 20px var(--glow-pink);
 }
 
-.water-button:active {
+.neon-button:active {
   transform: translateY(0);
 }
 
+.neon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary Button */
+.secondary-button {
+  background: var(--black-lighter);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  border-radius: 12px;
+  padding: 12px 28px;
+  color: var(--neon-purple);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+  background: rgba(147, 51, 234, 0.1);
+  border-color: var(--neon-purple);
+}
+
 /* Input Fields */
-.water-input {
+.neon-input {
   width: 100%;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--black-lighter);
+  border: 1px solid rgba(147, 51, 234, 0.3);
   border-radius: 12px;
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
   font-family: inherit;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
 }
 
-.water-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.neon-input::placeholder {
+  color: var(--text-secondary);
 }
 
-.water-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+.neon-input:focus {
+  background: var(--black-card);
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 20px var(--glow-purple);
 }
 
-.water-input:focus {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: #00C9A7;
-  box-shadow: 0 0 20px rgba(0, 201, 167, 0.3);
-}
-
-.water-input:-webkit-autofill,
-.water-input:-webkit-autofill:hover,
-.water-input:-webkit-autofill:focus {
+.neon-input:-webkit-autofill,
+.neon-input:-webkit-autofill:hover,
+.neon-input:-webkit-autofill:focus {
   -webkit-text-fill-color: white;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.15) inset;
+  -webkit-box-shadow: 0 0 0px 1000px var(--black-lighter) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Habit Card */
 .habit-card {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
+  background: var(--black-card);
   border-radius: 16px;
   padding: 1.25rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(147, 51, 234, 0.2);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -177,24 +204,33 @@ body {
 }
 
 .habit-card:hover {
-  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(147, 51, 234, 0.5);
+  background: var(--black-lighter);
   transform: translateX(5px);
+  box-shadow: 0 4px 20px var(--glow-purple);
 }
 
 .habit-checkbox {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(147, 51, 234, 0.5);
   background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  flex-shrink: 0;
+}
+
+.habit-checkbox:hover {
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 15px var(--glow-purple);
 }
 
 .habit-checkbox.checked {
-  background: linear-gradient(135deg, #00C9A7, #0066FF);
-  border-color: #00C9A7;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 20px var(--glow-purple);
 }
 
 .habit-checkbox.checked::after {
@@ -205,6 +241,7 @@ body {
   transform: translate(-50%, -50%);
   color: white;
   font-weight: bold;
+  font-size: 16px;
 }
 
 /* Streak Badge */
@@ -212,36 +249,49 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
-  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+  padding: 6px 14px;
   border-radius: 20px;
   font-weight: 600;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  font-size: 0.85rem;
+  box-shadow: 0 4px 15px var(--glow-pink);
 }
 
-/* Ripple Effect */
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
+/* Stats Card */
+.stats-card {
+  background: var(--black-lighter);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  padding: 1.25rem;
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  width: 20px;
-  height: 20px;
-  animation: ripple 0.6s ease-out;
+.stats-card:hover {
+  border-color: var(--neon-purple);
+  box-shadow: 0 4px 20px var(--glow-purple);
+  transform: translateY(-3px);
 }
 
-/* Loading Wave */
+.stats-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0.5rem 0;
+}
+
+.stats-card-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Loading Animation */
 .loading-wave {
   display: flex;
   gap: 8px;
@@ -252,7 +302,7 @@ body {
 .loading-wave span {
   width: 12px;
   height: 12px;
-  background: white;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
   border-radius: 50%;
   animation: wave 1.2s ease-in-out infinite;
 }
@@ -274,11 +324,47 @@ body {
   }
 }
 
+/* Pulse Animation */
+@keyframes pulse-glow {
+  0%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px var(--glow-purple));
+  }
+  50% { 
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px var(--glow-pink));
+  }
+}
+
+.pulse-icon {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 /* Container */
 .container {
+  position: relative;
+  z-index: 10;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--black-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
 }
 
 /* Responsive */
@@ -289,5 +375,9 @@ body {
   
   .glass-card {
     padding: 1.5rem;
+  }
+
+  .stats-card-value {
+    font-size: 1.5rem;
   }
 }
