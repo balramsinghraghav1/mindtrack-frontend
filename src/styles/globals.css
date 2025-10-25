@@ -134,6 +134,15 @@ body {
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
+  font-family: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.water-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .water-input::placeholder {
@@ -141,9 +150,17 @@ body {
 }
 
 .water-input:focus {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border-color: #00C9A7;
   box-shadow: 0 0 20px rgba(0, 201, 167, 0.3);
+}
+
+.water-input:-webkit-autofill,
+.water-input:-webkit-autofill:hover,
+.water-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: white;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.15) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Habit Card */
