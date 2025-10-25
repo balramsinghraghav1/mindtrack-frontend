@@ -1,4 +1,3 @@
-import AIHabitSuggester from '../components/AIHabitSuggester';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -43,17 +42,26 @@ export default function Dashboard() {
     try {
       const q = query(
         collection(db, 'habits'),
-        where('userId', '==', currentUser.uid),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', currentUser.uid)
       );
       const snapshot = await getDocs(q);
       const habitsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort in JavaScript instead of Firestore
+      habitsData.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA;
+      });
+      
       setHabits(habitsData);
+      console.log('Loaded habits:', habitsData.length);
     } catch (error) {
       console.error('Error loading habits:', error);
+      console.error('Error details:', error.code, error.message);
     }
     setLoading(false);
   }
@@ -168,21 +176,7 @@ export default function Dashboard() {
       </div>
     );
   }
-{/* AI Suggester */}
-<AIHabitSuggester 
-  currentHabits={habits.map(h => h.name)}
-  onAddHabit={async (habitName) => {
-    const habitData = {
-      name: habitName,
-      userId: currentUser.uid,
-      completedDates: [],
-      streak: 0,
-      createdAt: new Date().toISOString()
-    };
-    const docRef = await addDoc(collection(db, 'habits'), habitData);
-    setHabits([{ id: docRef.id, ...habitData }, ...habits]);
-  }}
-/>
+
   return (
     <div className="water-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem' }}>
