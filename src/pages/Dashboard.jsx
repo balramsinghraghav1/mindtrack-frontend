@@ -1,3 +1,5 @@
+import AIChatbot from '../components/AIChatbot';
+import Calendar from '../components/Calendar';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
