@@ -1,3 +1,5 @@
+import Calendar from '../components/Calendar';
+import AIChatbot from '../components/AIChatbot';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -77,6 +79,7 @@ export default function Dashboard() {
         streak: 0,
         createdAt: new Date().toISOString()
       };
+      
 
       const docRef = await addDoc(collection(db, 'habits'), habitData);
       setHabits([{ id: docRef.id, ...habitData }, ...habits]);
@@ -84,6 +87,22 @@ export default function Dashboard() {
       setShowForm(false);
     } catch (error) {
       console.error('Error adding habit:', error);
+    }
+  }
+  async function addHabitFromAI(habitName) {
+    try {
+      const habitData = {
+        name: habitName,
+        userId: currentUser.uid,
+        completedDates: [],
+        streak: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      const docRef = await addDoc(collection(db, 'habits'), habitData);
+      setHabits([{ id: docRef.id, ...habitData }, ...habits]);
+    } catch (error) {
+      console.error('Error adding habit from AI:', error);
     }
   }
 
@@ -179,6 +198,7 @@ export default function Dashboard() {
   return (
     <div className="black-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
+        
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -245,7 +265,14 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-
+        {/* Calendar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}>
+          
+          <Calendar habits={habits} />
+        </motion.div>
         {/* Add Habit Button */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -395,6 +422,12 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot 
+        currentHabits={habits.map(h => h.name)}
+        onAddHabit={addHabitFromAI}
+      />
     </div>
   );
 }
