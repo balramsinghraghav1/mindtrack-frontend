@@ -7,7 +7,9 @@ export default function Calendar({ habits }) {
   // Get all unique completion dates from all habits
   const allCompletedDates = new Set();
   habits.forEach(habit => {
-    habit.completedDates?.forEach(date => allCompletedDates.add(date));
+    if (habit.completedDates) {
+      habit.completedDates.forEach(date => allCompletedDates.add(date));
+    }
   });
 
   // Calendar logic
@@ -40,7 +42,7 @@ export default function Calendar({ habits }) {
 
   function getCompletionCount(day) {
     const dateStr = new Date(year, month, day).toISOString().split('T')[0];
-    return habits.filter(h => h.completedDates?.includes(dateStr)).length;
+    return habits.filter(h => h.completedDates && h.completedDates.includes(dateStr)).length;
   }
 
   function isToday(day) {
@@ -74,7 +76,7 @@ export default function Calendar({ habits }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <CalendarIcon size={24} color="#9333ea" />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0, color: 'white' }}>
             Activity Calendar
           </h2>
         </div>
@@ -93,6 +95,7 @@ export default function Calendar({ habits }) {
       }}>
         <button
           onClick={previousMonth}
+          type="button"
           style={{
             background: 'none',
             border: 'none',
@@ -105,8 +108,8 @@ export default function Calendar({ habits }) {
             borderRadius: '8px',
             transition: 'all 0.3s ease'
           }}
-          onMouseEnter={(e) => e.target.style.background = 'rgba(147, 51, 234, 0.1)'}
-          onMouseLeave={(e) => e.target.style.background = 'none'}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
         >
           <ChevronLeft size={24} />
         </button>
@@ -124,6 +127,7 @@ export default function Calendar({ habits }) {
 
         <button
           onClick={nextMonth}
+          type="button"
           style={{
             background: 'none',
             border: 'none',
@@ -136,8 +140,8 @@ export default function Calendar({ habits }) {
             borderRadius: '8px',
             transition: 'all 0.3s ease'
           }}
-          onMouseEnter={(e) => e.target.style.background = 'rgba(147, 51, 234, 0.1)'}
-          onMouseLeave={(e) => e.target.style.background = 'none'}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
         >
           <ChevronRight size={24} />
         </button>
