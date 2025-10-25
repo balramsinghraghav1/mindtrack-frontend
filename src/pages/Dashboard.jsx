@@ -23,8 +23,19 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import AIChatbot from '../components/AIChatbot';
-import Calendar from '../components/Calendar';
+
+// Conditional imports - only if files exist
+let AIChatbot, Calendar;
+try {
+  AIChatbot = require('../components/AIChatbot').default;
+} catch (e) {
+  console.log('AIChatbot not found');
+}
+try {
+  Calendar = require('../components/Calendar').default;
+} catch (e) {
+  console.log('Calendar not found');
+}
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
@@ -35,7 +46,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadHabits();
+    if (currentUser) {
+      loadHabits();
+    }
   }, [currentUser]);
 
   async function loadHabits() {
@@ -52,7 +65,6 @@ export default function Dashboard() {
         ...doc.data()
       }));
       
-      // Sort in JavaScript instead of Firestore
       habitsData.sort((a, b) => {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
@@ -60,10 +72,8 @@ export default function Dashboard() {
       });
       
       setHabits(habitsData);
-      console.log('Loaded habits:', habitsData.length);
     } catch (error) {
       console.error('Error loading habits:', error);
-      console.error('Error details:', error.code, error.message);
     }
     setLoading(false);
   }
@@ -90,7 +100,6 @@ export default function Dashboard() {
     }
   }
 
-  // Function for AI Chatbot to add habits
   async function addHabitFromAI(habitName) {
     try {
       const habitData = {
@@ -267,14 +276,16 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Calendar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Calendar habits={habits} />
-        </motion.div>
+        {/* Calendar - Only render if component exists */}
+        {Calendar && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Calendar habits={habits} />
+          </motion.div>
+        )}
 
         {/* Add Habit Button */}
         <motion.div
@@ -426,12 +437,13 @@ export default function Dashboard() {
         </AnimatePresence>
       </div>
 
-      {/* AI Chatbot - Floating Button */}
-      <AIChatbot 
-        currentHabits={habits.map(h => h.name)}
-        onAddHabit={addHabitFromAI}
-      />
+      {/* AI Chatbot - Only render if component exists */}
+      {AIChatbot && (
+        <AIChatbot 
+          currentHabits={habits.map(h => h.name)}
+          onAddHabit={addHabitFromAI}
+        />
+      )}
     </div>
   );
 }
-
