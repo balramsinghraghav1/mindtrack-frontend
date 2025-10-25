@@ -73,14 +73,14 @@ export default function Login() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            MindTrack
+            Pulse
           </h1>
           <p style={{ 
             color: 'rgba(255, 255, 255, 0.9)', 
             marginTop: '0.5rem',
             fontSize: '1rem'
           }}>
-            Flow into better habits
+            The Bio Rhythm
           </p>
         </div>
 
