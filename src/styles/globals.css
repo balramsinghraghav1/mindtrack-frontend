@@ -1,270 +1,293 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Droplets } from 'lucide-react';
+/* Water-Themed iPhone-like Design System */
 
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSignup, setIsSignup] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signup, login } = useAuth();
-  const navigate = useNavigate();
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+:root {
+  /* Water Color Palette */
+  --water-blue: #0066FF;
+  --water-light: #4D9FFF;
+  --water-dark: #0047B3;
+  --ocean-deep: #001F3F;
+  --foam-white: #F0F9FF;
+  --wave-teal: #00C9A7;
+  --bubble-cyan: #7DD3FC;
+  
+  /* Glass Morphism */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  
+  /* Gradients */
+  --water-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --ocean-gradient: linear-gradient(to bottom, #0066FF, #00C9A7);
+  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+}
 
-    try {
-      if (isSignup) {
-        await signup(email, password);
-      } else {
-        await login(email, password);
-      }
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message);
-    }
-    setLoading(false);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Animated Water Background */
+.water-bg {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-x: hidden;
+}
+
+.water-bg::before {
+  content: '';
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: water-flow 20s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes water-flow {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+/* Glass Card Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+}
+
+/* Water Button */
+.water-button {
+  background: linear-gradient(135deg, #0066FF, #00C9A7);
+  border: none;
+  border-radius: 15px;
+  padding: 12px 28px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.water-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.water-button:hover::before {
+  left: 100%;
+}
+
+.water-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.5);
+}
+
+.water-button:active {
+  transform: translateY(0);
+}
+
+/* Input Fields */
+.water-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.water-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.water-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.water-input:focus {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #00C9A7;
+  box-shadow: 0 0 20px rgba(0, 201, 167, 0.3);
+}
+
+.water-input:-webkit-autofill,
+.water-input:-webkit-autofill:hover,
+.water-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: white;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.15) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Habit Card */
+.habit-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.habit-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateX(5px);
+}
+
+.habit-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.habit-checkbox.checked {
+  background: linear-gradient(135deg, #00C9A7, #0066FF);
+  border-color: #00C9A7;
+}
+
+.habit-checkbox.checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+}
+
+/* Streak Badge */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
   }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
 
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      position: 'relative',
-      zIndex: 1
-    }}>
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        padding: '2.5rem',
-        maxWidth: '420px',
-        width: '100%',
-        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
-        position: 'relative',
-        zIndex: 100
-      }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Droplets 
-            size={56} 
-            color="#00C9A7" 
-            style={{ 
-              display: 'inline-block',
-              animation: 'float 3s ease-in-out infinite'
-            }}
-          />
-          <h1 style={{ 
-            fontSize: '2.5rem', 
-            fontWeight: '700', 
-            marginTop: '1rem',
-            background: 'linear-gradient(135deg, #00C9A7, #0066FF)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            MindTrack
-          </h1>
-          <p style={{ 
-            color: 'rgba(255, 255, 255, 0.9)', 
-            marginTop: '0.5rem',
-            fontSize: '1rem'
-          }}>
-            Flow into better habits
-          </p>
-        </div>
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  width: 20px;
+  height: 20px;
+  animation: ripple 0.6s ease-out;
+}
 
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            background: 'rgba(255, 107, 107, 0.25)',
-            border: '1px solid rgba(255, 107, 107, 0.5)',
-            padding: '14px',
-            borderRadius: '12px',
-            marginBottom: '1.5rem',
-            color: '#FFE5E5',
-            fontSize: '0.95rem'
-          }}>
-            {error}
-          </div>
-        )}
+/* Loading Wave */
+.loading-wave {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 101 }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.6rem',
-              fontSize: '0.95rem',
-              fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.95)'
-            }}>
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                background: 'rgba(255, 255, 255, 0.25)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                borderRadius: '12px',
-                color: 'white',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'all 0.3s ease',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
-                appearance: 'none'
-              }}
-              onFocus={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.3)';
-                e.target.style.borderColor = '#00C9A7';
-                e.target.style.boxShadow = '0 0 0 3px rgba(0, 201, 167, 0.2)';
-              }}
-              onBlur={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.25)';
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </div>
+.loading-wave span {
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  animation: wave 1.2s ease-in-out infinite;
+}
 
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.6rem',
-              fontSize: '0.95rem',
-              fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.95)'
-            }}>
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete="current-password"
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                background: 'rgba(255, 255, 255, 0.25)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                borderRadius: '12px',
-                color: 'white',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'all 0.3s ease',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
-                appearance: 'none'
-              }}
-              onFocus={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.3)';
-                e.target.style.borderColor = '#00C9A7';
-                e.target.style.boxShadow = '0 0 0 3px rgba(0, 201, 167, 0.2)';
-              }}
-              onBlur={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.25)';
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </div>
+.loading-wave span:nth-child(2) {
+  animation-delay: 0.2s;
+}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              background: loading 
-                ? 'rgba(255, 255, 255, 0.3)' 
-                : 'linear-gradient(135deg, #0066FF, #00C9A7)',
-              border: 'none',
-              borderRadius: '12px',
-              color: 'white',
-              fontSize: '1.05rem',
-              fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: loading 
-                ? 'none' 
-                : '0 4px 15px rgba(0, 102, 255, 0.4)',
-              opacity: loading ? 0.7 : 1
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(0, 102, 255, 0.5)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 15px rgba(0, 102, 255, 0.4)';
-              }
-            }}
-          >
-            {loading ? 'Loading...' : (isSignup ? 'Create Account' : 'Sign In')}
-          </button>
-        </form>
+.loading-wave span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
-        {/* Toggle */}
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <button
-            type="button"
-            onClick={() => setIsSignup(!isSignup)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#7DD3FC',
-              cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: '500',
-              textDecoration: 'underline',
-              padding: '0.5rem'
-            }}
-          >
-            {isSignup 
-              ? 'Already have an account? Sign In' 
-              : "Don't have an account? Sign Up"
-            }
-          </button>
-        </div>
-      </div>
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
 
-      {/* Floating animation */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-      `}</style>
-    </div>
-  );
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
 }
