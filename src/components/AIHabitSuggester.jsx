@@ -14,8 +14,8 @@ export default function AIHabitSuggester({ currentHabits, onAddHabit }) {
     setSuggestion('');
 
     const prompt = currentHabits.length > 0
-      ? `I'm currently tracking these habits: ${currentHabits.join(', ')}. Suggest ONE new simple wellness habit that complements these. Give only the habit name in 5-8 words, no explanation.`
-      : 'Suggest ONE simple wellness habit for a beginner. Give only the habit name in 5-8 words, no explanation.';
+      ? `I'm syncing with my bio rhythm by tracking: ${currentHabits.join(', ')}. Suggest ONE new simple wellness habit that enhances my natural rhythm. Give only the habit name in 5-8 words, no explanation.`
+      : 'Suggest ONE simple wellness habit that syncs with natural bio rhythms. Give only the habit name in 5-8 words, no explanation.';
 
     try {
       const response = await fetch(
@@ -63,7 +63,7 @@ export default function AIHabitSuggester({ currentHabits, onAddHabit }) {
       }}>
         <Sparkles size={24} color="#FFD93D" />
         <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
-          AI Habit Suggester
+          AI Rhythm Suggester
         </h2>
       </div>
 
