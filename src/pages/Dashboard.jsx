@@ -1,3 +1,4 @@
+import AIHabitSuggester from '../components/AIHabitSuggester';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -167,7 +168,21 @@ export default function Dashboard() {
       </div>
     );
   }
-
+{/* AI Suggester */}
+<AIHabitSuggester 
+  currentHabits={habits.map(h => h.name)}
+  onAddHabit={async (habitName) => {
+    const habitData = {
+      name: habitName,
+      userId: currentUser.uid,
+      completedDates: [],
+      streak: 0,
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(collection(db, 'habits'), habitData);
+    setHabits([{ id: docRef.id, ...habitData }, ...habits]);
+  }}
+/>
   return (
     <div className="water-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem' }}>
