@@ -1,31 +1,30 @@
-import AIChatbot from '../components/AIChatbot';
-import Calendar from '../components/Calendar';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity,
-  Plus, 
-  Check, 
-  Trash2, 
-  LogOut, 
+  Plus,
+  Check,
+  Trash2,
+  LogOut,
   Flame,
   Sparkles,
-  Calendar
+  Calendar as CalendarIcon
 } from 'lucide-react';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
   deleteDoc,
   doc,
   query,
-  where,
-  orderBy
+  where
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import AIChatbot from '../components/AIChatbot';
+import Calendar from '../components/Calendar';
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
@@ -41,7 +40,7 @@ export default function Dashboard() {
 
   async function loadHabits() {
     if (!currentUser) return;
-    
+
     try {
       const q = query(
         collection(db, 'habits'),
@@ -52,19 +51,17 @@ export default function Dashboard() {
         id: doc.id,
         ...doc.data()
       }));
-      
-      // Sort in JavaScript instead of Firestore
+
       habitsData.sort((a, b) => {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
         return dateB - dateA;
       });
-      
+
       setHabits(habitsData);
       console.log('Loaded habits:', habitsData.length);
     } catch (error) {
       console.error('Error loading habits:', error);
-      console.error('Error details:', error.code, error.message);
     }
     setLoading(false);
   }
@@ -94,7 +91,7 @@ export default function Dashboard() {
   async function toggleHabit(habit) {
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = habit.completedDates?.includes(today);
-    
+
     let newCompletedDates;
     let newStreak = habit.streak || 0;
 
@@ -113,8 +110,8 @@ export default function Dashboard() {
         streak: newStreak
       });
 
-      setHabits(habits.map(h => 
-        h.id === habit.id 
+      setHabits(habits.map(h =>
+        h.id === habit.id
           ? { ...h, completedDates: newCompletedDates, streak: newStreak }
           : h
       ));
@@ -125,23 +122,23 @@ export default function Dashboard() {
 
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
-    
+
     const sorted = dates.sort().reverse();
     let streak = 0;
     const today = new Date();
-    
+
     for (let i = 0; i < sorted.length; i++) {
       const date = new Date(sorted[i]);
       const expectedDate = new Date(today);
       expectedDate.setDate(today.getDate() - i);
-      
+
       if (date.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
         streak++;
       } else {
         break;
       }
     }
-    
+
     return streak;
   }
 
@@ -165,11 +162,11 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="water-bg" style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
+      <div className="water-bg" style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
         <div className="loading-wave">
           <span></span>
@@ -181,8 +178,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="water-bg">
+    <div className="black-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem' }}>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -190,76 +188,68 @@ export default function Dashboard() {
           className="glass-card"
           style={{ marginBottom: '2rem' }}
         >
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '1rem'
           }}>
-            <div>
-              <h1 style={{ fontSize: '2rem', fontWeight: '700' }}>
-                Your Habits
-              </h1>
-              <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginTop: '0.5rem' }}>
-                {currentUser.email}
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Activity size={40} color="#9333ea" className="pulse-icon" />
+              <div>
+                <h1 style={{
+                  fontSize: '2.5rem',
+                  fontWeight: '800',
+                  background: 'linear-gradient(135deg, #9333ea, #ec4899)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  Your Pulse
+                </h1>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginTop: '0.5rem' }}>
+                  {currentUser.email}
+                </p>
+              </div>
             </div>
-            <button onClick={handleLogout} className="water-button">
+            <button onClick={handleLogout} className="neon-button">
               <LogOut size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
               Logout
             </button>
           </div>
 
-          {/* Stats */}
-          <div style={{ 
-            display: 'grid', 
+          {/* Stats Section */}
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
             gap: '1rem',
             marginTop: '1.5rem'
           }}>
-            <div style={{ 
-              background: 'rgba(0, 201, 167, 0.2)',
-              padding: '1rem',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <Check size={24} style={{ marginBottom: '0.5rem' }} />
-              <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                {completedToday}/{habits.length}
-              </div>
-              <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Today</div>
-            </div>
-            
-            <div style={{ 
-              background: 'rgba(255, 107, 107, 0.2)',
-              padding: '1rem',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <Flame size={24} style={{ marginBottom: '0.5rem' }} />
-              <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                {totalStreak}
-              </div>
-              <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Total Streak</div>
+            <div className="stats-card">
+              <Check size={24} color="#10b981" />
+              <div className="stats-card-value">{completedToday}/{habits.length}</div>
+              <div className="stats-card-label">Today</div>
             </div>
 
-            <div style={{ 
-              background: 'rgba(125, 211, 252, 0.2)',
-              padding: '1rem',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <Calendar size={24} style={{ marginBottom: '0.5rem' }} />
-              <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                {habits.length}
-              </div>
-              <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Active Habits</div>
+            <div className="stats-card">
+              <Flame size={24} color="#ec4899" />
+              <div className="stats-card-value">{totalStreak}</div>
+              <div className="stats-card-label">Total Streak</div>
+            </div>
+
+            <div className="stats-card">
+              <CalendarIcon size={24} color="#06b6d4" />
+              <div className="stats-card-value">{habits.length}</div>
+              <div className="stats-card-label">Active Habits</div>
             </div>
           </div>
         </motion.div>
 
-        {/* Add Habit Button */}
+        {/* Calendar */}
+        <Calendar habits={habits} />
+
+        {/* Add Habit Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -269,8 +259,8 @@ export default function Dashboard() {
           {!showForm ? (
             <button
               onClick={() => setShowForm(true)}
-              className="water-button"
-              style={{ width: '100%', padding: '1rem' }}
+              className="neon-button"
+              style={{ width: '100%', padding: '1rem', fontSize: '1.05rem' }}
             >
               <Plus size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
               Add New Habit
@@ -293,7 +283,7 @@ export default function Dashboard() {
                 />
               </div>
               <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="water-button" style={{ flex: 1 }}>
+                <button type="submit" className="neon-button" style={{ flex: 1 }}>
                   <Sparkles size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
                   Create
                 </button>
@@ -340,7 +330,7 @@ export default function Dashboard() {
           ) : (
             habits.map((habit, index) => {
               const isCompletedToday = habit.completedDates?.includes(today);
-              
+
               return (
                 <motion.div
                   key={habit.id}
@@ -354,10 +344,10 @@ export default function Dashboard() {
                     className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
                     onClick={() => toggleHabit(habit)}
                   />
-                  
+
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ 
-                      fontSize: '1.1rem', 
+                    <h3 style={{
+                      fontSize: '1.1rem',
                       fontWeight: '600',
                       textDecoration: isCompletedToday ? 'line-through' : 'none',
                       opacity: isCompletedToday ? 0.7 : 1
@@ -365,16 +355,16 @@ export default function Dashboard() {
                       {habit.name}
                     </h3>
                     {habit.streak > 0 && (
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '0.5rem',
                         marginTop: '0.5rem'
                       }}>
                         <Flame size={16} color="#FFD93D" />
-                        <span style={{ 
-                          fontSize: '0.9rem', 
-                          color: 'rgba(255, 255, 255, 0.8)' 
+                        <span style={{
+                          fontSize: '0.9rem',
+                          color: 'rgba(255, 255, 255, 0.8)'
                         }}>
                           {habit.streak} day streak
                         </span>
@@ -407,7 +397,24 @@ export default function Dashboard() {
             })
           )}
         </AnimatePresence>
+
+        {/* AI Chatbot */}
+        <AIChatbot
+          currentHabits={habits.map(h => h.name)}
+          onAddHabit={async (habitName) => {
+            const habitData = {
+              name: habitName,
+              userId: currentUser.uid,
+              completedDates: [],
+              streak: 0,
+              createdAt: new Date().toISOString()
+            };
+            const docRef = await addDoc(collection(db, 'habits'), habitData);
+            setHabits([{ id: docRef.id, ...habitData }, ...habits]);
+          }}
+        />
       </div>
     </div>
   );
 }
+
