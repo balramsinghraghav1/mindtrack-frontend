@@ -1,7 +1,7 @@
-import Calendar from '../components/Calendar';
-import AIChatbot from '../components/AIChatbot';
+import Calendar from '../components/Calendar.jsx';
+import AIChatbot from '../components/AIChatbot.jsx';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -24,7 +24,12 @@ import {
   query,
   where
 } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db } from '../firebase/config.js';
+
+// --- NEW IMPORTS ---
+import Stats from '../components/Stats.jsx';
+import FriendsList from '../components/FriendsList.jsx';
+// --- END NEW IMPORTS ---
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
@@ -115,7 +120,7 @@ export default function Dashboard() {
 
     if (isCompletedToday) {
       newCompletedDates = habit.completedDates.filter(date => date !== today);
-      newStreak = Math.max(0, newStreak - 1);
+      newStreak = Math.max(0, newStreak - 1); // This logic might need refinement for perfect streak tracking
     } else {
       newCompletedDates = [...(habit.completedDates || []), today];
       newStreak = calculateStreak(newCompletedDates);
@@ -141,20 +146,41 @@ export default function Dashboard() {
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
     
-    const sorted = [...dates].sort().reverse();
+    // Get unique dates, convert to Date objects, and sort descending
+    const sortedDates = [...new Set(dates)].map(d => new Date(d)).sort((a, b) => b - a);
+    
     let streak = 0;
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today
+
+    // Check if today or yesterday is the most recent completion
+    const mostRecent = sortedDates[0];
+    mostRecent.setHours(0, 0, 0, 0);
+
+    const diffDays = (today.getTime() - mostRecent.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffDays > 1) return 0; // Streak broken
+
+    let currentDate = new Date(today);
+    if (diffDays === 1) { // Most recent was yesterday
+        currentDate.setDate(currentDate.getDate() - 1);
+    }
     
-    for (let i = 0; i < sorted.length; i++) {
-      const date = new Date(sorted[i]);
-      const expectedDate = new Date(today);
-      expectedDate.setDate(today.getDate() - i);
-      
-      if (date.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
-        streak++;
-      } else {
-        break;
-      }
+    currentDate.setHours(0,0,0,0);
+
+    for (const date of sortedDates) {
+        const normalizedDate = new Date(date);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        if (normalizedDate.getTime() === currentDate.getTime()) {
+            streak++;
+            // Move to the previous day
+            currentDate.setDate(currentDate.getDate() - 1);
+        } else if (normalizedDate < currentDate) {
+            // Gap in dates
+            break;
+        }
+        // If normalizedDate > currentDate, it's a future date or duplicate, ignore
     }
     
     return streak;
@@ -229,7 +255,7 @@ export default function Dashboard() {
                   Your Pulse
                 </h1>
           <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-                {userName || currentUser?.email}
+                  {userName || currentUser?.email}
                 </p>
               </div>
             </div>
@@ -326,6 +352,20 @@ export default function Dashboard() {
             </motion.form>
           )}
         </motion.div>
+
+        {/* --- NEW: Stats / Trends Component --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          style={{ marginBottom: '1.5rem' }}
+        >
+          {/* We use a glass-card wrapper for consistent styling */}
+          <div className="glass-card">
+            <Stats habits={habits} />
+          </div>
+        </motion.div>
+        {/* --- END NEW --- */}
 
         {/* Habits List */}
         <AnimatePresence>
@@ -428,6 +468,22 @@ export default function Dashboard() {
         currentHabits={habits.map(h => h.name)}
         onAddHabit={addHabitFromAI}
       />
+
+      {/* --- NEW: Friends List Component --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="container" // Use container to constrain width
+        style={{ paddingBottom: '2rem', paddingTop: '1.5rem' }} // Add some spacing
+      >
+        <FriendsList />
+      </motion.div>
+      {/* --- END NEW --- */}
+
     </div>
   );
 }
+
+
+
