@@ -6,6 +6,7 @@ import { Activity } from 'lucide-react';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,12 @@ export default function Login() {
 
     try {
       if (isSignup) {
-        await signup(email, password);
+        if (!name.trim()) {
+          setError('Please enter your name');
+          setLoading(false);
+          return;
+        }
+        await signup(email, password, name);
       } else {
         await login(email, password);
       }
@@ -86,6 +92,31 @@ export default function Login() {
 
           {/* Form */}
           <form onSubmit={handleSubmit}>
+            {/* Name Field - Only for Signup */}
+            {isSignup && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '0.6rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#d4d4d8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={isSignup}
+                  className="neon-input"
+                />
+              </div>
+            )}
+
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ 
                 display: 'block', 
@@ -153,7 +184,11 @@ export default function Login() {
           <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
             <button
               type="button"
-              onClick={() => setIsSignup(!isSignup)}
+              onClick={() => {
+                setIsSignup(!isSignup);
+                setError('');
+                setName('');
+              }}
               style={{
                 background: 'none',
                 border: 'none',
