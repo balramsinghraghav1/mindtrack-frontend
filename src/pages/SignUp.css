@@ -1,0 +1,108 @@
+.signup-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  padding: 2rem 1rem; /* More padding for taller form */
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 450px; /* Slightly wider for the extra field */
+  padding: 2rem 2.5rem;
+}
+
+.signup-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.signup-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color-primary);
+  margin: 1rem 0 0.25rem 0;
+}
+
+.signup-subtitle {
+  font-size: 1rem;
+  color: var(--text-color-secondary);
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* We re-use .neon-input from globals.css */
+
+.neon-button {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+  font-size: 1.05rem;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+}
+
+.login-link p {
+  color: var(--text-color-secondary);
+}
+
+.login-link a {
+  color: var(--accent-green);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* We re-use .error-message from Login.css, which should be loaded */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: rgba(220, 53, 69, 0.1); /* Soft red */
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: var(--border-radius-md);
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-message p {
+  color: var(--accent-red);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.error-message svg {
+  color: var(--accent-red);
+  flex-shrink: 0;
+}
+
