@@ -1,4 +1,4 @@
-import Calendar from '../components/Calendar';
+import Calendar from '../components/Calendar'; // Keep the Calendar import
 import AIChatbot from '../components/AIChatbot';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -12,7 +12,8 @@ import {
   LogOut,
   Flame,
   Sparkles,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon, // Keep CalendarIcon for the stats card
+  UserCircle // New icon for user profile
 } from 'lucide-react';
 import {
   collection,
@@ -30,6 +31,8 @@ import { db } from '../firebase/config';
 import Motivation from '../components/Motivation';
 import GoalTracker from '../components/GoalTracker';
 import MoodTracker from '../components/MoodTracker';
+import TrendChart from '../components/TrendChart'; // NEW
+import StreakRewards from '../components/StreakRewards'; // NEW
 // --- END NEW IMPORTS ---
 
 export default function Dashboard() {
@@ -88,13 +91,15 @@ export default function Dashboard() {
       
 
       const docRef = await addDoc(collection(db, 'habits'), habitData);
-      setHabits([{ id: docRef.id, ...habitData }, ...habits]);
+      // Add new habit to the beginning of the list for fresh display
+      setHabits([ { id: docRef.id, ...habitData }, ...habits ]);
       setNewHabit('');
       setShowForm(false);
     } catch (error) {
       console.error('Error adding habit:', error);
     }
   }
+
   async function addHabitFromAI(habitName) {
     try {
       const habitData = {
@@ -106,7 +111,8 @@ export default function Dashboard() {
       };
 
       const docRef = await addDoc(collection(db, 'habits'), habitData);
-      setHabits([{ id: docRef.id, ...habitData }, ...habits]);
+      // Add new habit to the beginning of the list for fresh display
+      setHabits([ { id: docRef.id, ...habitData }, ...habits ]);
     } catch (error) {
       console.error('Error adding habit from AI:', error);
     }
@@ -147,24 +153,27 @@ export default function Dashboard() {
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
     
-    const sorted = [...dates].sort().reverse();
-    let streak = 0;
-    const today = new Date();
-    
-    for (let i = 0; i < sorted.length; i++) {
-      const date = new Date(sorted[i]);
-      const expectedDate = new Date(today);
-      expectedDate.setDate(today.getDate() - i);
-      
-      if (date.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
-        streak++;
-      } else {
-        break;
-      }
+    // Ensure dates are sorted for correct streak calculation
+    const sorted = [...dates].sort(); 
+    let currentStreak = 0;
+    let lastDate = null;
+
+    for (let i = sorted.length - 1; i >= 0; i--) {
+        const currentDate = new Date(sorted[i]);
+        const nextDay = new Date(currentDate);
+        nextDay.setDate(nextDay.getDate() + 1); // Day after current date
+
+        // Check if the next expected day is today or if it's a consecutive day
+        if (lastDate === null || lastDate.toISOString().split('T')[0] === nextDay.toISOString().split('T')[0]) {
+            currentStreak++;
+            lastDate = currentDate;
+        } else {
+            break; // Streak broken
+        }
     }
-    
-    return streak;
-  }
+    return currentStreak;
+}
+
 
   async function deleteHabit(habitId) {
     try {
@@ -202,264 +211,196 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="black-bg">
-      <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
-        
-        {/* Header, Stats, and Mood Tracker */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card"
-          style={{ marginBottom: '2rem' }}
-        >
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Activity size={48} color="#9333ea" className="pulse-icon" />
-              <div>
-                <h1 style={{ 
-                  fontSize: '2.5rem', 
-                  fontWeight: '800',
-                  background: 'linear-gradient(135deg, #9333ea, #ec4899)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  margin: 0,
-                  lineHeight: 1.2
-                }}>
-                  Your Pulse
-                </h1>
-            <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-                  {userName || currentUser?.email}
-                </p>
-              </div>
-            </div>
-            <button onClick={handleLogout} className="neon-button">
-              <LogOut size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-              Logout
-            </button>
+    // Changed black-bg to container, as global CSS will handle bg
+    <div className="container" style={{ minHeight: '100vh', padding: '2rem 1.5rem' }}>
+      
+      {/* Top Header Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card"
+        style={{ marginBottom: '2rem', padding: '1.5rem 2rem' }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 style={{ 
+              fontSize: '1.8rem', 
+              fontWeight: '700',
+              color: var('--text-color-primary'),
+              margin: 0,
+              lineHeight: 1.3
+            }}>
+              Small steps every day.<br/>You've got this!
+            </h1>
+            {/* <p style={{ color: var('--text-color-secondary'), marginTop: '0.25rem', fontSize: '0.95rem' }}>
+              {userName || currentUser?.email}
+            </p> */}
           </div>
+          <UserCircle size={48} color={var('--accent-green')} /> {/* Profile Icon */}
+        </div>
 
-          {/* Stats */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '1rem',
-            marginTop: '2rem'
-          }}>
-            <div className="stats-card">
-              <Check size={28} color="#10b981" />
-              <div className="stats-card-value">{completedToday}/{habits.length}</div>
-              <div className="stats-card-label">Today</div>
-            </div>
-            
-            <div className="stats-card">
-              <Flame size={28} color="#ec4899" />
-              <div className="stats-card-value">{totalStreak}</div>
-              <div className="stats-card-label">Total Streak</div>
-            </div>
-
-            <div className="stats-card">
-              <CalendarIcon size={28} color="#06b6d4" />
-              <div className="stats-card-value">{habits.length}</div>
-              <div className="stats-card-label">Active Habits</div>
+        {/* Habits Section (New UI style) */}
+        <div style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: var('--text-color-primary'), margin: 0 }}>Habits</h2>
+            <div className="streak-badge"> {/* Reusing streak badge style for total days */}
+              <Flame size={16} /> {totalStreak} Days
             </div>
           </div>
-
-          {/* --- NEW MOOD TRACKER --- */}
-          <MoodTracker />
-          {/* --- END MOOD TRACKER --- */}
-
-        </motion.div>
-
-        {/* --- NEW MOTIVATION COMPONENT --- */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <Motivation />
-        </motion.div>
-        {/* --- END MOTIVATION COMPONENT --- */}
-
-
-        {/* Calendar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}>
           
-          <Calendar habits={habits} />
-        </motion.div>
-
-        {/* --- NEW GOAL TRACKER --- */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          {/* Pass the totalStreak as a prop */}
-          <GoalTracker totalStreak={totalStreak} />
-        </motion.div>
-        {/* --- END GOAL TRACKER --- */}
-
-
-        {/* Add Habit Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          style={{ marginBottom: '1.5rem' }}
-        >
-          {!showForm ? (
-            <button
-              onClick={() => setShowForm(true)}
-              className="neon-button"
-              style={{ width: '100%', padding: '1rem', fontSize: '1.05rem' }}
-            >
-              <Plus size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-              Add New Habit
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            {/* Example suggested habits - could be dynamic or from AI chatbot suggestions */}
+            <button className="neon-button-light">
+              <Activity size={20} style={{ marginRight: '8px' }} /> Exerc
             </button>
-          ) : (
-            <motion.form
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass-card"
-              onSubmit={addHabit}
-            >
-              <div style={{ marginBottom: '1rem' }}>
+            <button className="neon-button-light">
+              <Sparkles size={20} style={{ marginRight: '8px' }} /> Read
+            </button>
+            {/* Add more as needed */}
+
+            {!showForm ? (
+              <button
+                onClick={() => setShowForm(true)}
+                className="neon-button" // Primary green button
+              >
+                <Plus size={20} style={{ marginRight: '8px' }} />
+                Add Habit
+              </button>
+            ) : (
+              // Form for adding new habit
+              <motion.form
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="add-habit-form" // New class for form styling
+                onSubmit={addHabit}
+                style={{ width: '100%', display: 'flex', gap: '0.5rem' }}
+              >
                 <input
                   type="text"
-                  className="neon-input"
+                  className="neon-input" // Reusing styled input
                   placeholder="e.g., Meditate for 10 minutes"
                   value={newHabit}
                   onChange={(e) => setNewHabit(e.target.value)}
                   autoFocus
+                  style={{ flexGrow: 1 }}
                 />
-              </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="neon-button" style={{ flex: 1 }}>
-                  <Sparkles size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                  Create
+                <button type="submit" className="neon-button" style={{ width: 'auto', padding: '0.8rem 1rem' }}>
+                  <Check size={20} />
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setNewHabit('');
-                  }}
-                  className="secondary-button"
-                  style={{ flex: 1 }}
+                  onClick={() => { setShowForm(false); setNewHabit(''); }}
+                  className="secondary-button" // Muted cancel button
+                  style={{ width: 'auto', padding: '0.8rem 1rem' }}
                 >
-                  Cancel
+                  <Trash2 size={20} />
                 </button>
-              </div>
-            </motion.form>
-          )}
-        </motion.div>
+              </motion.form>
+            )}
+          </div>
+        </div>
 
-        {/* Habits List */}
-        <AnimatePresence>
-          {habits.length === 0 ? (
+        {/* Moods Section */}
+        <div style={{ marginTop: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: var('--text-color-primary'), margin: '0 0 1rem 0' }}>Moods</h2>
+          <MoodTracker /> {/* MoodTracker is already self-contained */}
+        </div>
+
+      </motion.div>
+
+      {/* Main Two-Column Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+        {/* Left Column (Calendar and Reminders/Goals) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <Calendar habits={habits} /> {/* Calendar now has its own unique style */}
+
+          {/* Goal Tracker (styled to fit the new look) */}
+          <GoalTracker totalStreak={totalStreak} /> 
+        </div>
+
+        {/* Right Column (Trend and Streak Rewards) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <TrendChart /> {/* NEW: Trend Chart */}
+          <StreakRewards totalStreak={totalStreak} /> {/* NEW: Streak Rewards */}
+        </div>
+      </div>
+      
+      {/* Habits List (Your existing habit list) - Positioned below the main 2-column layout or where it makes sense */}
+      <AnimatePresence>
+          {habits.length === 0 && !showForm ? ( // Only show empty state if no habits AND form isn't open
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="glass-card"
-              style={{ textAlign: 'center', padding: '3rem' }}
+              style={{ textAlign: 'center', padding: '3rem', marginTop: '1.5rem' }}
             >
-              <Sparkles size={64} color="#9333ea" style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+              <Sparkles size={64} color={var('--accent-green')} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
               <h3 style={{ 
                 fontSize: '1.75rem', 
                 marginBottom: '0.75rem',
-                background: 'linear-gradient(135deg, #9333ea, #ec4899)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                color: var('--text-color-primary'),
                 fontWeight: '700'
               }}>
                 Start Your Rhythm
               </h3>
-              <p style={{ color: '#a1a1aa', fontSize: '1.05rem' }}>
+              <p style={{ color: var('--text-color-secondary'), fontSize: '1.05rem' }}>
                 Create your first habit to sync with your bio rhythm
               </p>
             </motion.div>
           ) : (
-            habits.map((habit, index) => {
-              const isCompletedToday = habit.completedDates?.includes(today);
-              
-              return (
-                <motion.div
-                  key={habit.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="habit-card"
-                >
-                  <div
-                    className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
-                    onClick={() => toggleHabit(habit)}
-                  />
-                  
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ 
-                      fontSize: '1.1rem', 
-                      fontWeight: '600',
-                      textDecoration: isCompletedToday ? 'line-through' : 'none',
-                      opacity: isCompletedToday ? 0.7 : 1,
-                      color: 'white'
-                    }}>
-                      {habit.name}
-                    </h3>
-                    {habit.streak > 0 && (
-                      <div className="streak-badge" style={{ 
-                        display: 'inline-flex',
-                        marginTop: '0.5rem'
-                      }}>
-                        <Flame size={16} />
-                        <span>{habit.streak} day streak</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => deleteHabit(habit.id)}
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      border: '1px solid rgba(239, 68, 68, 0.4)',
-                      borderRadius: '10px',
-                      padding: '10px',
-                      cursor: 'pointer',
-                      color: '#fca5a5',
-                      transition: 'all 0.3s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-                      e.currentTarget.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.4)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
+            // Habit list
+            <div style={{ marginTop: '1.5rem' }}>
+              {habits.map((habit, index) => {
+                const isCompletedToday = habit.completedDates?.includes(today);
+                
+                return (
+                  <motion.div
+                    key={habit.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="habit-card" // Reusing glass-card style for habits
                   >
-                    <Trash2 size={20} />
-                  </button>
-                </motion.div>
-              );
-            })
-          )}
-        </AnimatePresence>
-      </div>
+                    <div
+                      className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
+                      onClick={() => toggleHabit(habit)}
+                    />
+                    
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ 
+                        fontSize: '1.1rem', 
+                        fontWeight: '600',
+                        textDecoration: isCompletedToday ? 'line-through' : 'none',
+                        opacity: isCompletedToday ? 0.7 : 1,
+                        color: var('--text-color-primary')
+                      }}>
+                        {habit.name}
+                      </h3>
+                      {habit.streak > 0 && (
+                        <div className="streak-badge">
+                          <Flame size={16} />
+                          <span>{habit.streak} day streak</span>
+                        </div>
+                      )}
+                    </div>
 
-      {/* AI Chatbot */}
+                    <button
+                      onClick={() => deleteHabit(habit.id)}
+                      className="delete-button" // New class for delete
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+      </AnimatePresence>
+
+      {/* AI Chatbot - remains at the bottom, or consider integrating differently */}
       <AIChatbot 
         currentHabits={habits.map(h => h.name)}
         onAddHabit={addHabitFromAI}
@@ -467,3 +408,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
