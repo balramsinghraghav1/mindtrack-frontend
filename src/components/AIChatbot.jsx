@@ -35,13 +35,15 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
 
     try {
       const context = currentHabits.length > 0
-        ? `User currently tracks: ${currentHabits.join(', ')}. `
+        ? `Current habits: ${currentHabits.join(', ')}. `
         : '';
 
-      const prompt = `${context}You are a wellness coach. User asks: "${userMessage}". Give a brief response (2-3 sentences). If suggesting a habit, write "I recommend: [habit name]"`;
+      const prompt = `${context}Question: "${userMessage}". Give 1-2 sentence wellness advice. If suggesting a habit, write "I recommend: [habit name]"`;
 
+      console.log('Sending request to Gemini...');
+      
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: 'POST',
           headers: { 
@@ -49,23 +51,28 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
           },
           body: JSON.stringify({
             contents: [{
-              parts: [{
-                text: prompt
-              }]
+              parts: [{ text: prompt }]
             }],
             generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 200
+              temperature: 0.9,
+              maxOutputTokens: 150,
+              topP: 1,
+              topK: 1
             }
           })
         }
       );
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(`API returned ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
         const aiResponse = data.candidates[0].content.parts[0].text;
@@ -75,20 +82,27 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
       }
 
     } catch (error) {
-      console.error('AI Error:', error);
-      let errorMessage = "I'm having connection issues. ";
+      console.error('Full AI Error:', error);
       
-      if (error.message.includes('403')) {
-        errorMessage += "Please check if the API key is enabled for Gemini API.";
-      } else if (error.message.includes('429')) {
-        errorMessage += "Too many requests. Please wait a moment.";
+      // Fallback responses based on keywords
+      let fallbackResponse = '';
+      const lower = userMessage.toLowerCase();
+      
+      if (lower.includes('morning')) {
+        fallbackResponse = "I recommend: 10-minute morning stretching routine. Start your day by syncing with your body's natural wake-up rhythm!";
+      } else if (lower.includes('sleep')) {
+        fallbackResponse = "I recommend: No screens 30 minutes before bed. This helps regulate your circadian rhythm for better sleep quality.";
+      } else if (lower.includes('energy')) {
+        fallbackResponse = "I recommend: Take a 5-minute walk every 2 hours. Movement aligns with your body's natural energy cycles.";
+      } else if (lower.includes('stress') || lower.includes('relax')) {
+        fallbackResponse = "I recommend: 5 minutes of deep breathing daily. This helps balance your nervous system's bio rhythm.";
       } else {
-        errorMessage += "Try asking: 'Suggest a morning habit' or 'What habits help with sleep?'";
+        fallbackResponse = "I recommend: Drink a glass of water upon waking. Hydration kickstarts your metabolic rhythm. (Note: AI temporarily offline - this is a preset suggestion)";
       }
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: errorMessage
+        content: fallbackResponse
       }]);
     }
 
