@@ -89,15 +89,51 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
       const lower = userMessage.toLowerCase();
       
       if (lower.includes('morning')) {
-        fallbackResponse = "I recommend: 10-minute morning stretching routine. Start your day by syncing with your body's natural wake-up rhythm!";
-      } else if (lower.includes('sleep')) {
-        fallbackResponse = "I recommend: No screens 30 minutes before bed. This helps regulate your circadian rhythm for better sleep quality.";
-      } else if (lower.includes('energy')) {
-        fallbackResponse = "I recommend: Take a 5-minute walk every 2 hours. Movement aligns with your body's natural energy cycles.";
-      } else if (lower.includes('stress') || lower.includes('relax')) {
-        fallbackResponse = "I recommend: 5 minutes of deep breathing daily. This helps balance your nervous system's bio rhythm.";
+          fallbackResponse = "I recommend: 10-minute morning stretching routine. Start your day by syncing with your body's natural wake-up rhythm!";
+      } else if (lower.includes('sleep') || lower.includes('bedtime')) {
+          fallbackResponse = "I recommend: No screens 30 minutes before bed. This helps regulate your circadian rhythm for better sleep quality.";
+      } else if (lower.includes('energy') || lower.includes('focus')) {
+          fallbackResponse = "I recommend: Take a 5-minute walk every 2 hours. Movement aligns with your body's natural energy cycles.";
+      } else if (lower.includes('stress') || lower.includes('relax') || lower.includes('anxiety')) {
+          fallbackResponse = "I recommend: 5 minutes of deep breathing daily. This helps balance your nervous system's bio rhythm.";
+      } else if (lower.includes('hydration') || lower.includes('water')) {
+          fallbackResponse = "I recommend: Drink a glass of water upon waking and before meals to maintain metabolic balance.";
+      } else if (lower.includes('exercise') || lower.includes('workout')) {
+          fallbackResponse = "I recommend: Schedule your workouts according to your peak energy times. Morning cardio or evening strength training works well!";
+      } else if (lower.includes('meal') || lower.includes('food') || lower.includes('nutrition')) {
+          fallbackResponse = "I recommend: Eat small balanced meals every 3-4 hours to keep your energy levels stable throughout the day.";
+      } else if (lower.includes('mood') || lower.includes('happy') || lower.includes('sad')) {
+          fallbackResponse = "I recommend: Take 5 minutes for mindful journaling or gratitude practice to align emotional rhythms.";
+      } else if (lower.includes('focus') || lower.includes('productivity')) {
+          fallbackResponse = "I recommend: Use the Pomodoro technique – 25 min work, 5 min break – to optimize your attention cycles.";
+      } else if (lower.includes('break') || lower.includes('rest')) {
+          fallbackResponse = "I recommend: Take micro-breaks every hour. Even 2 minutes of stretching or walking can boost your rhythm.";
+      } else if (lower.includes('sunlight') || lower.includes('daylight')) {
+          fallbackResponse = "I recommend: Get at least 15 minutes of sunlight in the morning to regulate your circadian rhythm naturally.";
+      } else if (lower.includes('meditation') || lower.includes('mindfulness')) {
+          fallbackResponse = "I recommend: 10 minutes of meditation or mindfulness exercises daily to stabilize your mental and emotional rhythm.";
+      } else if (lower.includes('heart') || lower.includes('cardio')) {
+          fallbackResponse = "I recommend: 20 minutes of moderate cardio 3-4 times a week to keep your heart rhythm healthy.";
+      } else if (lower.includes('digestion') || lower.includes('gut')) {
+          fallbackResponse = "I recommend: Eat slowly and chew thoroughly. A steady eating rhythm helps your digestive system work efficiently.";
+      } else if (lower.includes('posture') || lower.includes('back')) {
+          fallbackResponse = "I recommend: Take 2-3 minute posture breaks every hour to align your spine and reduce strain.";
+      } else if (lower.includes('breathing') || lower.includes('oxygen')) {
+          fallbackResponse = "I recommend: Try box breathing – inhale 4, hold 4, exhale 4, hold 4 – to sync your nervous system rhythm.";
+      } else if (lower.includes('brain') || lower.includes('memory')) {
+          fallbackResponse = "I recommend: 10 minutes of brain games or puzzles daily to keep your cognitive rhythm sharp.";
+      } else if (lower.includes('relaxation') || lower.includes('calm')) {
+          fallbackResponse = "I recommend: Listen to calming music or nature sounds for 10 minutes to reset your stress rhythm.";
+      } else if (lower.includes('focus') || lower.includes('concentration')) {
+          fallbackResponse = "I recommend: Work in 90-minute deep focus sessions followed by 20-minute breaks – aligns with ultradian rhythm.";
+      } else if (lower.includes('stretch') || lower.includes('mobility')) {
+          fallbackResponse = "I recommend: 5-10 minutes of mobility exercises in the morning and evening to maintain joint rhythm.";
+      } else if (lower.includes('eye') || lower.includes('vision')) {
+          fallbackResponse = "I recommend: Follow the 20-20-20 rule – every 20 minutes, look at something 20 feet away for 20 seconds – to protect eye rhythm.";
+      } else if (lower.includes('motivation') || lower.includes('goal')) {
+          fallbackResponse = "I recommend: Set 1-3 achievable goals each morning. Tracking small wins aligns your mental rhythm with productivity.";
       } else {
-        fallbackResponse = "I recommend: Drink a glass of water upon waking. Hydration kickstarts your metabolic rhythm. (Note: AI temporarily offline - this is a preset suggestion)";
+          fallbackResponse = "I recommend: Drink a glass of water upon waking. Hydration kickstarts your metabolic rhythm. (Note: AI temporarily offline - this is a preset suggestion)";
       }
       
       setMessages(prev => [...prev, { 
@@ -372,7 +408,7 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
                 style={{
                   padding: '0.75rem',
                   background: input.trim() && !loading 
-                    ? 'linear-gradient(135deg, #9333ea, #ec4899)'
+                    ? 'linear-gradient(135deg, #fbbf24, #84cc16)'
                     : '#1a1a1a',
                   border: 'none',
                   borderRadius: '12px',
