@@ -9,11 +9,11 @@ import {
   Plus,
   Check,
   Trash2,
-  LogOut,
+  LogOut, // <-- IMPORTED LOGOUT ICON
   Flame,
   Sparkles,
   Calendar as CalendarIcon,
-  UserCircle // New icon for user profile
+  UserCircle
 } from 'lucide-react';
 import {
   collection,
@@ -27,22 +27,23 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-// --- NEW IMPORTS ---
+// --- (Other component imports are the same) ---
 import Motivation from '../components/Motivation';
 import GoalTracker from '../components/GoalTracker';
 import MoodTracker from '../components/MoodTracker';
 import TrendChart from '../components/TrendChart'; 
 import StreakRewards from '../components/StreakRewards'; 
-// --- END NEW IMPORTS ---
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const { currentUser, userName, logout } = useAuth();
+  const { currentUser, userName, logout } = useAuth(); // userName is available here
   const navigate = useNavigate();
 
+  // ... (useEffect and all functions like loadHabits, addHabit, etc. remain unchanged) ...
+  
   useEffect(() => {
     if (currentUser) {
       loadHabits();
@@ -161,20 +162,19 @@ export default function Dashboard() {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Normalize today
     
-    // Check if today is completed
-    const todayStr = today.toISOString().split('T')[0];
     let startDate = new Date(today); // Start checking from today
+    const todayStr = today.toISOString().split('T')[0];
 
-    if (sortedDates[0] === todayStr) {
-      // Streak includes today
-      streak = 0; // Start counting from today
+    if (sortedDates.length > 0 && sortedDates[0] === todayStr) {
+      // Streak includes today, start counting from today
+      startDate = new Date(today);
     } else {
       // Today is not completed, check if yesterday was
       const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
       
-      if (sortedDates[0] === yesterdayStr) {
+      if (sortedDates.length > 0 && sortedDates[0] === yesterdayStr) {
         // Streak ended yesterday
         startDate.setDate(startDate.getDate() - 1); // Start checking from yesterday
       } else {
@@ -218,13 +218,12 @@ export default function Dashboard() {
 
   const today = new Date().toISOString().split('T')[0];
   const completedToday = habits.filter(h => h.completedDates?.includes(today)).length;
-  // --- FIX: Calculate Total Streak from individual habit streaks ---
   const totalStreak = habits.reduce((sum, h) => sum + (h.streak || 0), 0);
 
 
   if (loading) {
     return (
-      <div className="black-bg" style={{ 
+      <div style={{ 
         minHeight: '100vh', 
         display: 'flex', 
         alignItems: 'center', 
@@ -258,10 +257,37 @@ export default function Dashboard() {
               margin: 0,
               lineHeight: 1.3
             }}>
-              Small steps every day.<br/>You've got this!
+              Small steps every day.
             </h1>
+            {/* --- NAME ADDED HERE --- */}
+            <p style={{ 
+              color: 'var(--text-color-secondary)', 
+              marginTop: '0.25rem', 
+              fontSize: '1.2rem',
+              fontWeight: '500'
+            }}>
+              You've got this, {userName || 'User'}!
+            </p>
           </div>
-          <UserCircle size={48} color='var(--accent-green)' /> {/* Profile Icon */}
+          
+          {/* --- LOGOUT BUTTON ADDED HERE --- */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <UserCircle size={48} color='var(--accent-green)' />
+            <button
+              onClick={handleLogout}
+              className="delete-button" // Re-using delete-button style for a subtle look
+              title="Logout"
+              style={{ 
+                color: 'var(--text-color-secondary)',
+                background: 'rgba(0,0,0,0.05)',
+                padding: '0.75rem'
+              }}
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+          {/* --- END OF ADDITIONS --- */}
+
         </div>
 
         {/* Habits Section (New UI style) */}
@@ -274,7 +300,6 @@ export default function Dashboard() {
           </div>
           
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            {/* Example suggested habits - could be dynamic or from AI chatbot suggestions */}
             <button className="neon-button-light">
               <Activity size={20} style={{ marginRight: '8px' }} /> Exercise
             </button>
@@ -285,24 +310,23 @@ export default function Dashboard() {
             {!showForm ? (
               <button
                 onClick={() => setShowForm(true)}
-                className="neon-button" // Primary green button
+                className="neon-button" 
               >
                 <Plus size={20} style={{ marginRight: '8px' }} />
                 Add Habit
               </button>
             ) : (
-              // Form for adding new habit
               <motion.form
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="add-habit-form" // New class for form styling
+                className="add-habit-form" 
                 onSubmit={addHabit}
               >
                 <input
                   type="text"
-                  className="neon-input" // Reusing styled input
+                  className="neon-input" 
                   placeholder="e.g., Meditate for 10 minutes"
                   value={newHabit}
                   onChange={(e) => setNewHabit(e.target.value)}
@@ -315,7 +339,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => { setShowForm(false); setNewHabit(''); }}
-                  className="secondary-button" // Muted cancel button
+                  className="secondary-button" 
                   style={{ width: 'auto', padding: '0.8rem 1rem' }}
                 >
                   <Trash2 size={20} />
@@ -328,10 +352,10 @@ export default function Dashboard() {
         {/* Moods Section */}
         <div style={{ marginTop: '1.5rem' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-color-primary)', margin: '0 0 1rem 0' }}>Moods</h2>
-          <MoodTracker /> {/* MoodTracker is already self-contained */}
+          <MoodTracker /> 
         </div>
         
-        {/* Stats Grid (from old design, now inside top card) */}
+        {/* Stats Grid */}
         <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -359,25 +383,26 @@ export default function Dashboard() {
 
       </motion.div>
 
-      {/* --- FIX: APPLY THE NEW GRID CLASS --- */}
+      {/* --- Main Dashboard Grid --- */}
       <div className="dashboard-grid">
-        {/* Left Column (Calendar and Reminders/Goals) */}
+        {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Calendar habits={habits} /> {/* Calendar now has its own unique style */}
+          <Calendar habits={habits} /> 
           <GoalTracker totalStreak={totalStreak} /> 
-          <Motivation /> {/* Moved Motivation here */}
+          <Motivation /> 
         </div>
 
-        {/* Right Column (Trend and Streak Rewards) */}
+        {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <TrendChart /> {/* NEW: Trend Chart */}
-          <StreakRewards totalStreak={totalStreak} /> {/* NEW: Streak Rewards */}
+          {/* --- PASSED HABITS TO TRENDCHART --- */}
+          <TrendChart habits={habits} /> 
+          <StreakRewards totalStreak={totalStreak} /> 
         </div>
       </div>
       
-      {/* Habits List (Your existing habit list) */}
+      {/* Habits List */}
       <AnimatePresence>
-          {habits.length === 0 && !showForm ? ( // Only show empty state if no habits AND form isn't open
+          {habits.length === 0 && !showForm ? ( 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -410,7 +435,7 @@ export default function Dashboard() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ delay: index * 0.05 }}
-                    className="habit-card" // Reusing glass-card style for habits
+                    className="habit-card" 
                   >
                     <div
                       className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
@@ -437,7 +462,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={() => deleteHabit(habit.id)}
-                      className="delete-button" // New class for delete
+                      className="delete-button" 
                     >
                       <Trash2 size={20} />
                     </button>
