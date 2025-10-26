@@ -37,7 +37,7 @@ export default function Login() {
   }
 
   return (
-    <div className="nature-bg">
+    <div className="black-bg">
       <div className="container" style={{ 
         minHeight: '100vh', 
         display: 'flex', 
@@ -56,7 +56,7 @@ export default function Login() {
               fontSize: '3rem', 
               fontWeight: '800', 
               marginTop: '1rem',
-              background: 'linear-gradient(135deg, #fbbf24, #84cc16)'
+              background: 'linear-gradient(135deg, #9333ea, #ec4899)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -112,7 +112,7 @@ export default function Login() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required={isSignup}
-                  className="nature-input"
+                  className="neon-input"
                 />
               </div>
             )}
@@ -135,7 +135,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="nature-input"
+                className="neon-input"
               />
             </div>
 
@@ -158,14 +158,14 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="nature-input"
+                className="neon-input"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="energy-button"
+              className="neon-button"
               style={{ width: '100%', fontSize: '1.05rem', padding: '14px' }}
             >
               {loading ? (
