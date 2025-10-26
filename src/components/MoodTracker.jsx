@@ -1,73 +1,80 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { db } from '../firebase/config';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import './MoodTracker.css';
 
-// We assume you have a way to save/fetch data, e.g., from Firebase context
-// import { useAuth } from '../context/AuthContext'; 
-// import { db } from '../firebase/config';
-// import { doc, setDoc, getDoc } from 'firebase/firestore';
-
-const moods = ['😊', '😐', '😢', '😠', '🥳', '😴'];
+const moods = [
+  { emoji: '🥳', label: 'Awesome' },
+  { emoji: '😊', label: 'Good' },
+  { emoji: '😐', label: 'Okay' },
+  { emoji: '😕', label: 'Meh' },
+  { emoji: '😢', label: 'Sad' },
+  { emoji: '😠', label: 'Angry' },
+];
 
 const MoodTracker = () => {
-  // const { currentUser } = useAuth(); // Example: Get user from context
-  const [selectedMood, setSelectedMood] = useState(null); // 'null' means no mood selected today
+  const { currentUser } = useAuth();
+  const [selectedMood, setSelectedMood] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // --- This part is for saving/loading from Firebase ---
-  // --- You can adapt this to your own Firebase setup ---
+  const getTodayDateString = () => new Date().toISOString().split('T')[0];
 
-  /*
   // Load today's mood when component mounts
   useEffect(() => {
     const fetchMood = async () => {
       if (!currentUser) return;
-      const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+      const today = getTodayDateString();
       const moodDocRef = doc(db, 'users', currentUser.uid, 'moods', today);
       
-      const docSnap = await getDoc(moodDocRef);
-      if (docSnap.exists()) {
-        setSelectedMood(docSnap.data().mood);
+      try {
+        const docSnap = await getDoc(moodDocRef);
+        if (docSnap.exists()) {
+          setSelectedMood(docSnap.data().emoji);
+        }
+      } catch (error) {
+        console.error("Error fetching mood: ", error);
       }
+      setLoading(false);
     };
+    
     fetchMood();
   }, [currentUser]);
 
   const handleMoodSelect = async (mood) => {
-    setSelectedMood(mood);
+    setSelectedMood(mood.emoji);
     if (!currentUser) return;
 
     // Save to Firebase
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayDateString();
+      // We use a path like /users/{userId}/moods/{YYYY-MM-DD}
       const moodDocRef = doc(db, 'users', currentUser.uid, 'moods', today);
-      await setDoc(moodDocRef, { mood: mood, timestamp: new Date() });
+      await setDoc(moodDocRef, { 
+        emoji: mood.emoji, 
+        label: mood.label,
+        timestamp: new Date() 
+      });
     } catch (error) {
       console.error("Error saving mood: ", error);
     }
   };
-  */
-  
-  // --- END FIREBASE EXAMPLE ---
 
-  // --- OFFLINE-ONLY VERSION (use this to test UI) ---
-  const handleMoodSelect = (mood) => {
-    setSelectedMood(mood);
-    console.log("Mood selected:", mood); 
-    // In real app, you'd save this to Firebase
-  };
-  // --- END OFFLINE VERSION ---
-
+  if (loading) {
+    return <div className="mood-tracker-container">Loading moods...</div>;
+  }
 
   return (
-    <div className="mood-tracker-box">
-      <h4>How are you feeling?</h4>
+    <div className="mood-tracker-container">
+      <h3 className="mood-title">How are you feeling today?</h3>
       <div className="mood-emojis">
-        {moods.map((emoji) => (
+        {moods.map((mood) => (
           <button
-            key={emoji}
-            className={`mood-emoji-btn ${selectedMood === emoji ? 'selected' : ''}`}
-            onClick={() => handleMoodSelect(emoji)}
+            key={mood.label}
+            className={`mood-emoji-btn ${selectedMood === mood.emoji ? 'selected' : ''}`}
+            onClick={() => handleMoodSelect(mood)}
           >
-            {emoji}
+            <span role="img" aria-label={mood.label}>{mood.emoji}</span>
           </button>
         ))}
       </div>
