@@ -13,7 +13,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  color: var(--text-color-primary); /* Use solid color, or a subtle gradient if preferred */
+  color: var(--text-color-primary); 
 }
 
 .goal-form {
@@ -49,6 +49,11 @@
   font-style: italic;
   font-size: 0.9rem;
 }
+/* Ensure text is visible */
+.no-goals-text, .goals-list p {
+  color: var(--text-color-secondary);
+}
+
 
 .goal-item {
   display: flex;
