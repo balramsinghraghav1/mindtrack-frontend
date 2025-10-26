@@ -1,4 +1,4 @@
-import Calendar from '../components/Calendar'; // Keep the Calendar import
+import Calendar from '../components/Calendar';
 import AIChatbot from '../components/AIChatbot';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -12,7 +12,7 @@ import {
   LogOut,
   Flame,
   Sparkles,
-  Calendar as CalendarIcon, // Keep CalendarIcon for the stats card
+  Calendar as CalendarIcon,
   UserCircle // New icon for user profile
 } from 'lucide-react';
 import {
@@ -31,8 +31,8 @@ import { db } from '../firebase/config';
 import Motivation from '../components/Motivation';
 import GoalTracker from '../components/GoalTracker';
 import MoodTracker from '../components/MoodTracker';
-import TrendChart from '../components/TrendChart'; // NEW
-import StreakRewards from '../components/StreakRewards'; // NEW
+import TrendChart from '../components/TrendChart'; 
+import StreakRewards from '../components/StreakRewards'; 
 // --- END NEW IMPORTS ---
 
 export default function Dashboard() {
@@ -127,7 +127,8 @@ export default function Dashboard() {
 
     if (isCompletedToday) {
       newCompletedDates = habit.completedDates.filter(date => date !== today);
-      newStreak = Math.max(0, newStreak - 1);
+      // Re-calculate streak properly
+      newStreak = calculateStreak(newCompletedDates);
     } else {
       newCompletedDates = [...(habit.completedDates || []), today];
       newStreak = calculateStreak(newCompletedDates);
@@ -152,27 +153,53 @@ export default function Dashboard() {
 
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
+
+    // Get unique, sorted dates in descending order
+    const sortedDates = [...new Set(dates)].sort().reverse();
     
-    // Ensure dates are sorted for correct streak calculation
-    const sorted = [...dates].sort(); 
-    let currentStreak = 0;
-    let lastDate = null;
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today
+    
+    // Check if today is completed
+    const todayStr = today.toISOString().split('T')[0];
+    let startDate = new Date(today); // Start checking from today
 
-    for (let i = sorted.length - 1; i >= 0; i--) {
-        const currentDate = new Date(sorted[i]);
-        const nextDay = new Date(currentDate);
-        nextDay.setDate(nextDay.getDate() + 1); // Day after current date
+    if (sortedDates[0] === todayStr) {
+      // Streak includes today
+      streak = 0; // Start counting from today
+    } else {
+      // Today is not completed, check if yesterday was
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (sortedDates[0] === yesterdayStr) {
+        // Streak ended yesterday
+        startDate.setDate(startDate.getDate() - 1); // Start checking from yesterday
+      } else {
+        // Streak is broken
+        return 0; 
+      }
+    }
 
-        // Check if the next expected day is today or if it's a consecutive day
-        if (lastDate === null || lastDate.toISOString().split('T')[0] === nextDay.toISOString().split('T')[0]) {
-            currentStreak++;
-            lastDate = currentDate;
+    // Loop through sorted dates to find consecutive days
+    for (let i = 0; i < sortedDates.length; i++) {
+        const expectedDate = new Date(startDate);
+        expectedDate.setDate(startDate.getDate() - i); // Day we expect
+        
+        const expectedDateStr = expectedDate.toISOString().split('T')[0];
+        const actualDateStr = sortedDates[i];
+
+        if (actualDateStr === expectedDateStr) {
+            streak++; // It's a match, increment streak
         } else {
-            break; // Streak broken
+            break; // Streak is broken
         }
     }
-    return currentStreak;
-}
+    
+    return streak;
+  }
 
 
   async function deleteHabit(habitId) {
@@ -191,7 +218,9 @@ export default function Dashboard() {
 
   const today = new Date().toISOString().split('T')[0];
   const completedToday = habits.filter(h => h.completedDates?.includes(today)).length;
+  // --- FIX: Calculate Total Streak from individual habit streaks ---
   const totalStreak = habits.reduce((sum, h) => sum + (h.streak || 0), 0);
+
 
   if (loading) {
     return (
@@ -211,7 +240,6 @@ export default function Dashboard() {
   }
 
   return (
-    // Changed black-bg to container, as global CSS will handle bg
     <div className="container" style={{ minHeight: '100vh', padding: '2rem 1.5rem' }}>
       
       {/* Top Header Section */}
@@ -226,23 +254,20 @@ export default function Dashboard() {
             <h1 style={{ 
               fontSize: '1.8rem', 
               fontWeight: '700',
-              color: var('--text-color-primary'),
+              color: 'var(--text-color-primary)',
               margin: 0,
               lineHeight: 1.3
             }}>
               Small steps every day.<br/>You've got this!
             </h1>
-            {/* <p style={{ color: var('--text-color-secondary'), marginTop: '0.25rem', fontSize: '0.95rem' }}>
-              {userName || currentUser?.email}
-            </p> */}
           </div>
-          <UserCircle size={48} color={var('--accent-green')} /> {/* Profile Icon */}
+          <UserCircle size={48} color='var(--accent-green)' /> {/* Profile Icon */}
         </div>
 
         {/* Habits Section (New UI style) */}
         <div style={{ marginTop: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: var('--text-color-primary'), margin: 0 }}>Habits</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-color-primary)', margin: 0 }}>Habits</h2>
             <div className="streak-badge"> {/* Reusing streak badge style for total days */}
               <Flame size={16} /> {totalStreak} Days
             </div>
@@ -251,12 +276,11 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
             {/* Example suggested habits - could be dynamic or from AI chatbot suggestions */}
             <button className="neon-button-light">
-              <Activity size={20} style={{ marginRight: '8px' }} /> Exerc
+              <Activity size={20} style={{ marginRight: '8px' }} /> Exercise
             </button>
             <button className="neon-button-light">
               <Sparkles size={20} style={{ marginRight: '8px' }} /> Read
             </button>
-            {/* Add more as needed */}
 
             {!showForm ? (
               <button
@@ -275,7 +299,6 @@ export default function Dashboard() {
                 transition={{ duration: 0.3 }}
                 className="add-habit-form" // New class for form styling
                 onSubmit={addHabit}
-                style={{ width: '100%', display: 'flex', gap: '0.5rem' }}
               >
                 <input
                   type="text"
@@ -304,20 +327,45 @@ export default function Dashboard() {
 
         {/* Moods Section */}
         <div style={{ marginTop: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: var('--text-color-primary'), margin: '0 0 1rem 0' }}>Moods</h2>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-color-primary)', margin: '0 0 1rem 0' }}>Moods</h2>
           <MoodTracker /> {/* MoodTracker is already self-contained */}
+        </div>
+        
+        {/* Stats Grid (from old design, now inside top card) */}
+        <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '1rem',
+            marginTop: '2rem'
+          }}>
+            <div className="stats-card">
+              <Check size={28} color="var(--accent-green)" />
+              <div className="stats-card-value">{completedToday}/{habits.length}</div>
+              <div className="stats-card-label">Today</div>
+            </div>
+            
+            <div className="stats-card">
+              <Flame size={28} color="var(--accent-orange)" />
+              <div className="stats-card-value">{totalStreak}</div>
+              <div className="stats-card-label">Total Streak</div>
+            </div>
+
+            <div className="stats-card">
+              <CalendarIcon size={28} color="var(--accent-purple)" />
+              <div className="stats-card-value">{habits.length}</div>
+              <div className="stats-card-label">Active Habits</div>
+            </div>
         </div>
 
       </motion.div>
 
-      {/* Main Two-Column Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+      {/* --- FIX: APPLY THE NEW GRID CLASS --- */}
+      <div className="dashboard-grid">
         {/* Left Column (Calendar and Reminders/Goals) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <Calendar habits={habits} /> {/* Calendar now has its own unique style */}
-
-          {/* Goal Tracker (styled to fit the new look) */}
           <GoalTracker totalStreak={totalStreak} /> 
+          <Motivation /> {/* Moved Motivation here */}
         </div>
 
         {/* Right Column (Trend and Streak Rewards) */}
@@ -327,7 +375,7 @@ export default function Dashboard() {
         </div>
       </div>
       
-      {/* Habits List (Your existing habit list) - Positioned below the main 2-column layout or where it makes sense */}
+      {/* Habits List (Your existing habit list) */}
       <AnimatePresence>
           {habits.length === 0 && !showForm ? ( // Only show empty state if no habits AND form isn't open
             <motion.div
@@ -336,16 +384,16 @@ export default function Dashboard() {
               className="glass-card"
               style={{ textAlign: 'center', padding: '3rem', marginTop: '1.5rem' }}
             >
-              <Sparkles size={64} color={var('--accent-green')} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+              <Sparkles size={64} color='var(--accent-green)' style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
               <h3 style={{ 
                 fontSize: '1.75rem', 
                 marginBottom: '0.75rem',
-                color: var('--text-color-primary'),
+                color: 'var(--text-color-primary)',
                 fontWeight: '700'
               }}>
                 Start Your Rhythm
               </h3>
-              <p style={{ color: var('--text-color-secondary'), fontSize: '1.05rem' }}>
+              <p style={{ color: 'var(--text-color-secondary)', fontSize: '1.05rem' }}>
                 Create your first habit to sync with your bio rhythm
               </p>
             </motion.div>
@@ -375,7 +423,7 @@ export default function Dashboard() {
                         fontWeight: '600',
                         textDecoration: isCompletedToday ? 'line-through' : 'none',
                         opacity: isCompletedToday ? 0.7 : 1,
-                        color: var('--text-color-primary')
+                        color: 'var(--text-color-primary)'
                       }}>
                         {habit.name}
                       </h3>
@@ -400,7 +448,6 @@ export default function Dashboard() {
           )}
       </AnimatePresence>
 
-      {/* AI Chatbot - remains at the bottom, or consider integrating differently */}
       <AIChatbot 
         currentHabits={habits.map(h => h.name)}
         onAddHabit={addHabitFromAI}
@@ -408,4 +455,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
