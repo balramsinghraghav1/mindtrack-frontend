@@ -9,7 +9,7 @@ import {
   Plus,
   Check,
   Trash2,
-  LogOut, // <-- IMPORTED LOGOUT ICON
+  LogOut,
   Flame,
   Sparkles,
   Calendar as CalendarIcon,
@@ -34,15 +34,23 @@ import MoodTracker from '../components/MoodTracker';
 import TrendChart from '../components/TrendChart'; 
 import StreakRewards from '../components/StreakRewards'; 
 
+// --- NEW HELPER FUNCTION ---
+// Returns 'YYYY-MM-DD' for the user's *local* date, not UTC.
+function getLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+// --- END NEW FUNCTION ---
+
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const { currentUser, userName, logout } = useAuth(); // userName is available here
+  const { currentUser, userName, logout } = useAuth();
   const navigate = useNavigate();
-
-  // ... (useEffect and all functions like loadHabits, addHabit, etc. remain unchanged) ...
   
   useEffect(() => {
     if (currentUser) {
@@ -87,12 +95,10 @@ export default function Dashboard() {
         userId: currentUser.uid,
         completedDates: [],
         streak: 0,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString() // UTC is fine for creation timestamp
       };
       
-
       const docRef = await addDoc(collection(db, 'habits'), habitData);
-      // Add new habit to the beginning of the list for fresh display
       setHabits([ { id: docRef.id, ...habitData }, ...habits ]);
       setNewHabit('');
       setShowForm(false);
@@ -112,7 +118,6 @@ export default function Dashboard() {
       };
 
       const docRef = await addDoc(collection(db, 'habits'), habitData);
-      // Add new habit to the beginning of the list for fresh display
       setHabits([ { id: docRef.id, ...habitData }, ...habits ]);
     } catch (error) {
       console.error('Error adding habit from AI:', error);
@@ -120,19 +125,21 @@ export default function Dashboard() {
   }
 
   async function toggleHabit(habit) {
-    const today = new Date().toISOString().split('T')[0];
+    // --- FIX 1: Use local date string ---
+    const today = getLocalDateString(new Date()); 
     const isCompletedToday = habit.completedDates?.includes(today);
     
     let newCompletedDates;
-    let newStreak = habit.streak || 0;
+    let newStreak;
 
     if (isCompletedToday) {
+      // User is UN-CHECKING the box
       newCompletedDates = habit.completedDates.filter(date => date !== today);
-      // Re-calculate streak properly
-      newStreak = calculateStreak(newCompletedDates);
+      newStreak = calculateStreak(newCompletedDates); // Recalculate
     } else {
+      // User is CHECKING the box
       newCompletedDates = [...(habit.completedDates || []), today];
-      newStreak = calculateStreak(newCompletedDates);
+      newStreak = calculateStreak(newCompletedDates); // Recalculate
     }
 
     try {
@@ -152,6 +159,7 @@ export default function Dashboard() {
     }
   }
 
+  // --- FIX 2: Updated streak logic to use local dates ---
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
 
@@ -160,47 +168,47 @@ export default function Dashboard() {
     
     let streak = 0;
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today
+    today.setHours(0, 0, 0, 0); // Normalize local today
     
-    let startDate = new Date(today); // Start checking from today
-    const todayStr = today.toISOString().split('T')[0];
+    let startDate = new Date(today); // Start checking from local today
+    const todayStr = getLocalDateString(today); // Get local YYYY-MM-DD
 
+    // Check 1: Is today the most recent completion?
     if (sortedDates.length > 0 && sortedDates[0] === todayStr) {
-      // Streak includes today, start counting from today
-      startDate = new Date(today);
-    } else {
-      // Today is not completed, check if yesterday was
+      startDate = new Date(today); // Yes, start counting from today
+    } 
+    // Check 2: Is yesterday the most recent completion?
+    else {
       const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = getLocalDateString(yesterday); // Get local YYYY-MM-DD
       
       if (sortedDates.length > 0 && sortedDates[0] === yesterdayStr) {
-        // Streak ended yesterday
-        startDate.setDate(startDate.getDate() - 1); // Start checking from yesterday
-      } else {
-        // Streak is broken
-        return 0; 
+        startDate = new Date(yesterday); // Yes, start counting from yesterday
+      } 
+      // Check 3: Most recent completion is older than yesterday
+      else {
+        return 0; // Streak is broken
       }
     }
 
-    // Loop through sorted dates to find consecutive days
+    // Loop and count consecutive days back from `startDate`
     for (let i = 0; i < sortedDates.length; i++) {
         const expectedDate = new Date(startDate);
-        expectedDate.setDate(startDate.getDate() - i); // Day we expect
+        expectedDate.setDate(startDate.getDate() - i); // e.g., today, then yesterday, then day before
         
-        const expectedDateStr = expectedDate.toISOString().split('T')[0];
+        const expectedDateStr = getLocalDateString(expectedDate); // Get local YYYY-MM-DD
         const actualDateStr = sortedDates[i];
 
         if (actualDateStr === expectedDateStr) {
-            streak++; // It's a match, increment streak
+            streak++; // Dates match, add to streak
         } else {
-            break; // Streak is broken
+            break; // Mismatch, streak ends
         }
     }
-    
     return streak;
   }
-
+  // --- END OF FIX 2 ---
 
   async function deleteHabit(habitId) {
     try {
@@ -216,10 +224,10 @@ export default function Dashboard() {
     navigate('/');
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  // --- FIX 3: Use local date string ---
+  const today = getLocalDateString(new Date());
   const completedToday = habits.filter(h => h.completedDates?.includes(today)).length;
   const totalStreak = habits.reduce((sum, h) => sum + (h.streak || 0), 0);
-
 
   if (loading) {
     return (
@@ -259,7 +267,6 @@ export default function Dashboard() {
             }}>
               Small steps every day.
             </h1>
-            {/* --- NAME ADDED HERE --- */}
             <p style={{ 
               color: 'var(--text-color-secondary)', 
               marginTop: '0.25rem', 
@@ -270,12 +277,11 @@ export default function Dashboard() {
             </p>
           </div>
           
-          {/* --- LOGOUT BUTTON ADDED HERE --- */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <UserCircle size={48} color='var(--accent-green)' />
             <button
               onClick={handleLogout}
-              className="delete-button" // Re-using delete-button style for a subtle look
+              className="delete-button" 
               title="Logout"
               style={{ 
                 color: 'var(--text-color-secondary)',
@@ -286,15 +292,13 @@ export default function Dashboard() {
               <LogOut size={20} />
             </button>
           </div>
-          {/* --- END OF ADDITIONS --- */}
-
         </div>
 
-        {/* Habits Section (New UI style) */}
+        {/* Habits Section */}
         <div style={{ marginTop: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-color-primary)', margin: 0 }}>Habits</h2>
-            <div className="streak-badge"> {/* Reusing streak badge style for total days */}
+            <div className="streak-badge">
               <Flame size={16} /> {totalStreak} Days
             </div>
           </div>
@@ -394,7 +398,6 @@ export default function Dashboard() {
 
         {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* --- PASSED HABITS TO TRENDCHART --- */}
           <TrendChart habits={habits} /> 
           <StreakRewards totalStreak={totalStreak} /> 
         </div>
