@@ -59,6 +59,8 @@ export default function Dashboard() {
   }
 
   async function addHabit(e) {
+    // Add this line near where 'today' is defined for toggleHabit/stats, or inside the functions
+    const today = new Date().toISOString().split('T')[0];
     e.preventDefault();
     if (!newHabit.trim()) return;
 
@@ -66,7 +68,7 @@ export default function Dashboard() {
       const habitData = {
         name: newHabit,
         userId: currentUser.uid,
-        completedDates: [],
+        completedDates: [today],
         streak: 0,
         createdAt: new Date().toISOString()
       };
@@ -175,7 +177,7 @@ export default function Dashboard() {
     const habitData = {
       name: habitName,
       userId: currentUser.uid,
-      completedDates: [],
+      completedDates: [today],
       streak: 0,
       createdAt: new Date().toISOString()
     };
