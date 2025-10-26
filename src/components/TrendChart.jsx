@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import './TrendChart.css'; // We will create this CSS file next
+import './TrendChart.css'; // This will use the updated CSS
 
-// Define the labels for the X-axis
-const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+// Define the tooltips for the days
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const TrendChart = ({ habits }) => {
   // State for the 7-day data (Mon-Sun)
   const [weekData, setWeekData] = useState([0, 0, 0, 0, 0, 0, 0]);
-  // State for the max value of the Y-axis (e.g., 5, 10, 15)
-  const [yAxisMax, setYAxisMax] = useState(5);
 
   useEffect(() => {
     // This function processes the habits and calculates the data for the current week
@@ -19,7 +17,6 @@ const TrendChart = ({ habits }) => {
       
       // Calculate the date for the start of the week (Monday)
       const startOfWeek = new Date(today);
-      // This formula finds the most recent Monday
       const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Mon=0, Tue=1... Sun=6
       startOfWeek.setDate(today.getDate() - offset);
       startOfWeek.setHours(0, 0, 0, 0);
@@ -50,48 +47,30 @@ const TrendChart = ({ habits }) => {
 
       // Update the chart data
       setWeekData(days);
-
-      // Calculate the max value for the Y-axis
-      const maxCompleted = Math.max(...days, 0);
-      // Set Y-axis to the next multiple of 5 (or at least 5)
-      setYAxisMax(Math.max(5, Math.ceil(maxCompleted / 5) * 5));
     };
 
     processWeekData();
   }, [habits]); // Re-run this logic whenever the habits data changes
 
+  // Find the max value in the week to scale the bars
+  const maxCompleted = Math.max(...weekData, 1); // Use 1 as min to avoid division by zero
+
   return (
     <div className="trend-chart-container glass-card">
-      <h3 className="trend-chart-title">This Week's Activity</h3>
+      <h3 className="trend-chart-title">Activity Trend</h3>
       
-      <div className="chart-wrapper">
-        {/* Y-Axis Labels */}
-        <div className="y-axis">
-          <span>{yAxisMax}</span>
-          <span>{yAxisMax > 0 ? yAxisMax / 2 : ''}</span>
-          <span>0</span>
-        </div>
-
-        {/* Chart Bars */}
-        <div className="bars-wrapper">
-          {weekData.map((value, index) => (
-            <div key={index} className="bar-column">
-              <div 
-                className="bar" 
-                // Calculate bar height relative to the max Y-axis value
-                style={{ height: yAxisMax === 0 ? '0%' : `${(value / yAxisMax) * 100}%` }}
-                title={`${DAY_LABELS[index]}: ${value} habits`}
-              ></div>
-            </div>
-          ))}
-        </div>
-
-        {/* X-Axis Labels */}
-        <div className="x-axis">
-          {DAY_LABELS.map((day, index) => (
-            <span key={index} className="x-axis-label">{day}</span>
-          ))}
-        </div>
+      {/* Simplified bars wrapper */}
+      <div className="bars-wrapper">
+        {weekData.map((value, index) => (
+          <div key={index} className="bar-column">
+            <div 
+              className="bar" 
+              // Calculate bar height relative to the max value
+              style={{ height: `${(value / maxCompleted) * 100}%` }}
+              title={`${DAY_LABELS[index]}: ${value} habits`}
+            ></div>
+          </div>
+        ))}
       </div>
     </div>
   );
