@@ -5,6 +5,14 @@
   padding: 1.5rem 2rem;
 }
 
+/* NEW STYLE for the heading */
+.motivation-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e5e7eb; /* Light gray, consistent with mood tracker */
+  margin: 0 0 1rem 0; /* Margin top 0, margin bottom 1rem */
+}
+
 .motivation-container blockquote {
   font-size: 1.1rem;
   font-style: italic;
