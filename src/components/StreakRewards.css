@@ -1,0 +1,53 @@
+.streak-rewards-container {
+  /* Inherits glass-card */
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px; /* Fixed height to match trend chart */
+}
+
+.streak-rewards-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.medal-display {
+  font-size: 3.5rem; /* Large emoji */
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.medal-display span {
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); /* Soft shadow for emojis */
+}
+
+/* Specific medal glows/effects */
+.medal-display.bronze-medal span {
+  filter: drop-shadow(0 0 10px rgba(205, 127, 50, 0.7));
+}
+.medal-display.silver-medal span {
+  filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.7));
+}
+.medal-display.gold-medal span {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+}
+
+.reward-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.current-streak-display {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin: 0;
+}
