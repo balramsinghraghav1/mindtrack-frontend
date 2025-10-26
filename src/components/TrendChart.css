@@ -1,10 +1,10 @@
 .trend-chart-container {
-  /* Inherits glass-card, adjust specific styles */
+  /* Inherits glass-card */
   padding: 1.2rem 1.5rem;
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
-  height: 200px; /* Fixed height for the chart area */
+  height: 250px; /* Increased height for axes */
   justify-content: space-between;
 }
 
@@ -16,13 +16,64 @@
   margin-bottom: 0.8rem;
 }
 
+/* New wrapper to combine Y-Axis, Bars, and X-Axis */
+.chart-wrapper {
+  flex-grow: 1;
+  display: grid;
+  grid-template-areas:
+    "y-axis chart"
+    ".      x-axis";
+  grid-template-columns: auto 1fr; /* Y-axis takes auto width, chart takes rest */
+  grid-template-rows: 1fr auto;   /* Chart takes auto height, x-axis takes rest */
+  gap: 0.5rem;
+}
+
+/* Y-Axis Styling */
+.y-axis {
+  grid-area: y-axis;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+  padding-right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  height: 100%;
+  /* This padding aligns the '0' with the x-axis line */
+  padding-bottom: calc(1em + 2px); /* 1em for text height, 2px for border */
+}
+.y-axis span {
+  color: var(--text-color-secondary);
+}
+
+/* X-Axis Styling */
+.x-axis {
+  grid-area: x-axis;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  padding-left: 0.25rem; /* Align with bars */
+  padding-top: 0.25rem;
+}
+
+.x-axis-label {
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+/* Bars Wrapper */
 .bars-wrapper {
-  flex-grow: 1; /* Allows bars to take up available space */
+  grid-area: chart;
+  flex-grow: 1;
   display: flex;
   align-items: flex-end; /* Bars start from the bottom */
-  gap: 0.5rem; /* Space between bars */
-  padding-bottom: 0.5rem; /* Little padding from the bottom */
-  height: 100%; /* Ensure it fills parent height */
+  gap: 0.5rem;
+  padding: 0 0.25rem;
+  height: 100%;
+  border-left: 1px solid rgba(0,0,0,0.1); /* Y-axis line */
+  border-bottom: 1px solid rgba(0,0,0,0.1); /* X-axis line */
 }
 
 .bar-column {
@@ -35,7 +86,7 @@
 .bar {
   width: 100%;
   background: linear-gradient(to top, var(--accent-green), var(--accent-yellow)); /* Gradient for the bars */
-  border-radius: var(--border-radius-sm);
-  transition: height 0.5s ease; /* Smooth height transition */
-  min-height: 5px; /* Ensure even 0 value has a small visible base */
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* Rounded top */
+  transition: height 0.5s ease;
+  min-height: 2px; /* Ensure even 0 value has a small visible base */
 }
