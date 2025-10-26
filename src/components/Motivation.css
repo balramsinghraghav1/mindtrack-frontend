@@ -1,16 +1,14 @@
 .motivation-container {
-  width: 100%;
-  margin: 24px 0; /* Adds space above and below */
-  padding: 20px;
-  background-color: #1a1a1a; /* A dark color matching your theme */
-  border-radius: 12px;
-  border: 1px solid #333;
+  /* It already has glass-card, so this is just for text styling */
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
 }
 
 .motivation-container blockquote {
   font-size: 1.1rem;
   font-style: italic;
-  color: #e0e0e0; /* Light text */
-  text-align: center;
+  color: #d1d5db; /* Light gray text */
   margin: 0;
+  line-height: 1.6;
 }
