@@ -1,4 +1,4 @@
-/* Google Fonts - adjust as needed, e.g., 'Inter', 'Nunito' */
+/* Google Fonts - Import the 'Inter' font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
@@ -28,7 +28,7 @@
   font-family: 'Inter', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
+  color-scheme: light; /* Force light scheme based on design */
   color: var(--text-color-primary);
   background-color: var(--bg-color);
 
@@ -40,18 +40,65 @@
 
 body {
   margin: 0;
+  /* --- FIX 1: ADDED FLEX PROPERTIES TO CENTER THE APP --- */
   display: flex;
-  place-items: center;
+  flex-direction: column;
+  align-items: center;
+  /* --- END FIX 1 --- */
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--bg-color); /* Ensure body uses the new background */
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-h1 { font-size: 3.2em; line-height: 1.1; }
-h2 { font-size: 2.5em; line-height: 1.2; }
-h3 { font-size: 2em; line-height: 1.3; }
-h4 { font-size: 1.5em; line-height: 1.4; }
+/* Reset box-sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* --- FIX 2: STRONGER DEFAULTS FOR TEXT --- */
+h1, h2, h3, h4, h5, h6, p, div, span, blockquote, input, button {
+  color: var(--text-color-primary); /* Default to dark text */
+}
+input::placeholder {
+  color: var(--text-color-secondary);
+}
+/* --- END FIX 2 --- */
+
+
+h1 { font-size: 2.5rem; line-height: 1.2; font-weight: 700; margin: 0; }
+h2 { font-size: 2rem; line-height: 1.3; font-weight: 700; margin: 0; }
+h3 { font-size: 1.5rem; line-height: 1.4; font-weight: 600; margin: 0; }
+h4 { font-size: 1.2rem; line-height: 1.4; font-weight: 600; margin: 0; }
+p { margin: 0; }
+
+/* Main app container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+/* --- FIX 3: NEW GRID FOR DASHBOARD --- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Default to 1 column on mobile */
+  gap: 1.5rem;
+}
+
+/* At 768px (tablets) and up, switch to 2 columns */
+@media (min-width: 768px) {
+  .dashboard-grid {
+    /* 2fr 1fr means the left column is twice as wide as the right */
+    grid-template-columns: 2fr 1fr; 
+  }
+}
+/* --- END FIX 3 --- */
+
 
 /* General Glass Card Style */
 .glass-card {
@@ -68,7 +115,7 @@ h4 { font-size: 1.5em; line-height: 1.4; }
 /* Specific button styles (adapting from 'neon-button' to new theme) */
 .neon-button {
   background-color: var(--accent-green);
-  color: white;
+  color: white !important; /* Force white text on buttons */
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: var(--border-radius-md);
@@ -89,7 +136,7 @@ h4 { font-size: 1.5em; line-height: 1.4; }
 
 .secondary-button { /* Adapted for the "Cancel" style from Image 2 */
   background-color: #6C757D; /* Muted gray */
-  color: white;
+  color: white !important; /* Force white text on buttons */
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: var(--border-radius-md);
@@ -217,8 +264,11 @@ h4 { font-size: 1.5em; line-height: 1.4; }
 }
 
 .habit-checkbox.checked::after {
-  background-color: white; /* White checkmark effect */
-  transform: scale(0.7); /* Shrink slightly for a filled effect */
+  /* This creates a checkmark effect */
+  content: '\2713'; /* Checkmark character */
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 /* Streak Badge */
@@ -232,6 +282,10 @@ h4 { font-size: 1.5em; line-height: 1.4; }
   border-radius: var(--border-radius-sm);
   font-size: 0.8rem;
   font-weight: 600;
+}
+/* Ensure text inside badge is the correct color */
+.streak-badge span {
+  color: var(--accent-orange);
 }
 
 /* Loading wave */
@@ -260,22 +314,64 @@ h4 { font-size: 1.5em; line-height: 1.4; }
   50% { transform: translateY(-10px); opacity: 0.7; }
 }
 
-/* Utility for Flex containers */
-.flex-row {
+/* New button style for suggested habits (lighter green) */
+.neon-button-light {
+  background-color: rgba(40, 167, 69, 0.15); /* Lighter green */
+  color: var(--accent-green);
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(40, 167, 69, 0.1);
 }
-.flex-col {
+.neon-button-light:hover {
+  background-color: rgba(40, 167, 69, 0.25);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+/* Ensure text color is correct */
+.neon-button-light {
+  color: var(--accent-green) !important;
+}
+
+/* Delete button */
+.delete-button {
+  background: none; /* Make it transparent */
+  border: none;
+  color: var(--text-color-secondary); /* Muted color */
+  padding: 0.5rem;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.3s ease;
 }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
-.mt-4 { margin-top: 1rem; }
-.mb-4 { margin-bottom: 1rem; }
-.p-4 { padding: 1rem; }
-.text-center { text-align: center; }
+.delete-button:hover {
+  color: var(--accent-red); /* Red on hover */
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Add Habit Form */
+.add-habit-form {
+  background-color: var(--card-bg-light); /* Apply glass card styling */
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px 0 var(--shadow-color);
+  backdrop-filter: blur(var(--blur-amount));
+  -webkit-backdrop-filter: blur(var(--blur-amount));
+  padding: 1rem; /* Smaller padding for inline form */
+  width: 100%;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center; /* Center items vertically */
+  margin-top: 1rem; /* Space from the buttons above */
+}
 
 /* Small Screen Adjustments */
 @media (max-width: 768px) {
