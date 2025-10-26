@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import './Calendar.css'; // Import the new CSS file
 
 export default function Calendar({ habits }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -35,11 +36,6 @@ export default function Calendar({ habits }) {
     setCurrentMonth(new Date(year, month + 1, 1));
   }
 
-  function isDateCompleted(day) {
-    const dateStr = new Date(year, month, day).toISOString().split('T')[0];
-    return allCompletedDates.has(dateStr);
-  }
-
   function getCompletionCount(day) {
     const dateStr = new Date(year, month, day).toISOString().split('T')[0];
     return habits.filter(h => h.completedDates && h.completedDates.includes(dateStr)).length;
@@ -51,6 +47,20 @@ export default function Calendar({ habits }) {
            today.getMonth() === month && 
            today.getFullYear() === year;
   }
+
+  // --- NEW ---
+  // Helper function to render completion dots
+  function renderCompletionDots(count) {
+    const dots = [];
+    const dotCount = Math.min(count, 3); // Show max 3 dots
+    if (dotCount === 0) return null;
+
+    for (let i = 0; i < dotCount; i++) {
+      dots.push(<div key={i} className="completion-dot"></div>);
+    }
+    return <div className="completion-dots-container">{dots}</div>;
+  }
+  // --- END NEW ---
 
   // Generate calendar days
   const calendarDays = [];
@@ -66,242 +76,76 @@ export default function Calendar({ habits }) {
   }
 
   return (
-    <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
+    // Replaced 'glass-card' with 'calendar-container'
+    <div className="calendar-container"> 
       {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        marginBottom: '1.5rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="calendar-header">
+        <div className="calendar-title">
           <CalendarIcon size={24} color="#9333ea" />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0, color: 'white' }}>
-            Activity Calendar
-          </h2>
+          <h2>Activity Calendar</h2>
         </div>
       </div>
 
       {/* Month Navigation */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1.5rem',
-        padding: '0.75rem',
-        background: '#1a1a1a',
-        borderRadius: '12px',
-        border: '1px solid rgba(147, 51, 234, 0.2)'
-      }}>
-        <button
-          onClick={previousMonth}
-          type="button"
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#9333ea',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '8px',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-        >
+      <div className="calendar-nav">
+        <button onClick={previousMonth} type="button" className="nav-button">
           <ChevronLeft size={24} />
         </button>
 
-        <span style={{ 
-          fontSize: '1.2rem', 
-          fontWeight: '700',
-          background: 'linear-gradient(135deg, #9333ea, #ec4899)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
+        <span className="nav-month">
           {monthNames[month]} {year}
         </span>
 
-        <button
-          onClick={nextMonth}
-          type="button"
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#9333ea',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '8px',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-        >
+        <button onClick={nextMonth} type="button" className="nav-button">
           <ChevronRight size={24} />
         </button>
       </div>
 
       {/* Day Names */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '0.5rem',
-        marginBottom: '0.5rem'
-      }}>
+      <div className="day-names-grid">
         {dayNames.map(day => (
-          <div
-            key={day}
-            style={{
-              textAlign: 'center',
-              fontSize: '0.85rem',
-              fontWeight: '600',
-              color: '#a1a1aa',
-              padding: '0.5rem'
-            }}
-          >
+          <div key={day} className="day-name">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '0.5rem'
-      }}>
+      <div className="calendar-grid">
         {calendarDays.map((day, idx) => {
           if (day === null) {
-            return <div key={`empty-${idx}`} />;
+            return <div key={`empty-${idx}`} className="calendar-day empty" />;
           }
 
-          const completed = isDateCompleted(day);
           const count = getCompletionCount(day);
+          const completed = count > 0;
           const today = isToday(day);
           
+          // Dynamic classes
+          const dayClasses = [
+            "calendar-day",
+            completed ? "completed" : "",
+            today ? "today" : ""
+          ].join(" ");
+          
           return (
-            <div
-              key={day}
-              style={{
-                aspectRatio: '1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '10px',
-                background: completed 
-                  ? 'linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(236, 72, 153, 0.3))'
-                  : '#1a1a1a',
-                border: today 
-                  ? '2px solid #9333ea'
-                  : completed 
-                    ? '1px solid rgba(147, 51, 234, 0.5)'
-                    : '1px solid rgba(147, 51, 234, 0.1)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                boxShadow: completed ? '0 0 15px rgba(147, 51, 234, 0.3)' : 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (completed) {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 0 20px rgba(147, 51, 234, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = completed ? '0 0 15px rgba(147, 51, 234, 0.3)' : 'none';
-              }}
-            >
-              <span style={{
-                fontSize: '0.95rem',
-                fontWeight: today ? '700' : '500',
-                color: completed ? 'white' : '#a1a1aa'
-              }}>
-                {day}
-              </span>
-              
-              {completed && count > 0 && (
-                <span style={{
-                  fontSize: '0.7rem',
-                  color: '#ec4899',
-                  fontWeight: '700',
-                  marginTop: '2px'
-                }}>
-                  {count}
-                </span>
-              )}
+            <div key={day} className={dayClasses}>
+              <span className="day-number">{day}</span>
+              {renderCompletionDots(count)}
             </div>
           );
         })}
       </div>
 
       {/* Legend */}
-      <div style={{
-        marginTop: '1.5rem',
-        padding: '1rem',
-        background: '#1a1a1a',
-        borderRadius: '12px',
-        border: '1px solid rgba(147, 51, 234, 0.2)'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          gap: '1.5rem', 
-          justifyContent: 'center',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: '20px',
-              height: '20px',
-              borderRadius: '6px',
-              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(236, 72, 153, 0.3))',
-              border: '1px solid rgba(147, 51, 234, 0.5)'
-            }} />
-            <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>
-              Activity
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: '20px',
-              height: '20px',
-              borderRadius: '6px',
-              background: '#1a1a1a',
-              border: '2px solid #9333ea'
-            }} />
-            <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>
-              Today
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: '20px',
-              height: '20px',
-              borderRadius: '6px',
-              background: '#1a1a1a',
-              border: '1px solid rgba(147, 51, 234, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ec4899',
-              fontSize: '0.7rem',
-              fontWeight: '700'
-            }}>
-              3
-            </div>
-            <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>
-              Habit Count
-            </span>
-          </div>
+      <div className="calendar-legend">
+        <div className="legend-item">
+          <div className="legend-swatch today-swatch" />
+          <span className="legend-label">Today</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-swatch activity-swatch" />
+          <span className="legend-label">Activity</span>
         </div>
       </div>
     </div>
