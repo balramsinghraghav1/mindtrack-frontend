@@ -1,0 +1,41 @@
+.trend-chart-container {
+  /* Inherits glass-card, adjust specific styles */
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 200px; /* Fixed height for the chart area */
+  justify-content: space-between;
+}
+
+.trend-chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+}
+
+.bars-wrapper {
+  flex-grow: 1; /* Allows bars to take up available space */
+  display: flex;
+  align-items: flex-end; /* Bars start from the bottom */
+  gap: 0.5rem; /* Space between bars */
+  padding-bottom: 0.5rem; /* Little padding from the bottom */
+  height: 100%; /* Ensure it fills parent height */
+}
+
+.bar-column {
+  flex: 1; /* Each column takes equal width */
+  height: 100%;
+  display: flex;
+  align-items: flex-end; /* Ensure bars are at the bottom of their column */
+}
+
+.bar {
+  width: 100%;
+  background: linear-gradient(to top, var(--accent-green), var(--accent-yellow)); /* Gradient for the bars */
+  border-radius: var(--border-radius-sm);
+  transition: height 0.5s ease; /* Smooth height transition */
+  min-height: 5px; /* Ensure even 0 value has a small visible base */
+}
