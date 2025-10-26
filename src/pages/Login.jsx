@@ -1,117 +1,213 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { Activity, AlertCircle } from 'lucide-react';
-import './Login.css'; // This file needs to be created
-import { motion } from 'framer-motion'; // <-- ADDED THIS MISSING IMPORT
+import { Activity } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { signup, login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/dashboard'); // Redirect to dashboard on success
-    } catch (err) {
-      // --- This is the new error handling logic ---
-      let friendlyMessage = 'An unknown error occurred. Please try again.';
-      
-      switch (err.code) {
-        case 'auth/invalid-email':
-          friendlyMessage = 'Please enter a valid email address.';
-          break;
-        case 'auth/user-not-found':
-        case 'auth/invalid-credential':
-          friendlyMessage = 'No account found with this email or password.';
-          break;
-        case 'auth/wrong-password':
-          friendlyMessage = 'Wrong password. Please try again.';
-          break;
-        case 'auth/too-many-requests':
-          friendlyMessage = 'Too many attempts. Please try again later.';
-          break;
-        default:
-          friendlyMessage = 'Failed to log in. Please check your details.';
+      if (isSignup) {
+        if (!name.trim()) {
+          setError('Please enter your name');
+          setLoading(false);
+          return;
+        }
+        await signup(email, password, name);
+      } else {
+        await login(email, password);
       }
-      setError(friendlyMessage);
-      // --- End of new logic ---
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
     }
     setLoading(false);
-  };
+  }
 
   return (
-    <div className="login-container">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card login-card"
-      >
-        {/* Header */}
-        <div className="login-header">
-          <Activity size={48} color="var(--accent-green)" />
-          <h1 className="login-title">Welcome Back</h1>
-          <p className="login-subtitle">Log in to track your pulse.</p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="error-message"
-          >
-            <AlertCircle size={20} />
-            <p>{error}</p>
-          </motion.div>
-        )}
-
-        {/* Login Form */}
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="input-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              className="neon-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
+    <div className="black-bg">
+      <div className="container" style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <div className="glass-card" style={{ maxWidth: '420px', width: '100%' }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <Activity 
+              size={64} 
+              color="#9333ea" 
+              className="pulse-icon"
             />
+            <h1 style={{ 
+              fontSize: '3rem', 
+              fontWeight: '800', 
+              marginTop: '1rem',
+              background: 'linear-gradient(135deg, #9333ea, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.02em'
+            }}>
+              Pulse
+            </h1>
+            <p style={{ 
+              color: '#a1a1aa', 
+              marginTop: '0.5rem',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              letterSpacing: '0.05em'
+            }}>
+              The Bio Rhythm
+            </p>
           </div>
 
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              className="neon-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+          {/* Error Message */}
+          {error && (
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              padding: '14px',
+              borderRadius: '12px',
+              marginBottom: '1.5rem',
+              color: '#fca5a5',
+              fontSize: '0.95rem'
+            }}>
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            {/* Name Field - Only for Signup */}
+            {isSignup && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '0.6rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#d4d4d8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={isSignup}
+                  className="neon-input"
+                />
+              </div>
+            )}
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '0.6rem',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#d4d4d8',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="neon-input"
+              />
+            </div>
+
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '0.6rem',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#d4d4d8',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="neon-input"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="neon-button"
+              style={{ width: '100%', fontSize: '1.05rem', padding: '14px' }}
+            >
+              {loading ? (
+                <div className="loading-wave">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              ) : (
+                isSignup ? 'Create Account' : 'Sign In'
+              )}
+            </button>
+          </form>
+
+          {/* Toggle */}
+          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignup(!isSignup);
+                setError('');
+                setName('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#9333ea',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                fontWeight: '500',
+                textDecoration: 'underline',
+                padding: '0.5rem'
+              }}
+            >
+              {isSignup 
+                ? 'Already have an account? Sign In' 
+                : "Don't have an account? Sign Up"
+              }
+            </button>
           </div>
-
-          <button type="submit" className="neon-button" disabled={loading}>
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
-
-        {/* Sign Up Link */}
-        <div className="signup-link">
-          <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
