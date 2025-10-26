@@ -4,27 +4,33 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Activity,
-  Plus, 
-  Check, 
-  Trash2, 
-  LogOut, 
+  Plus,
+  Check,
+  Trash2,
+  LogOut,
   Flame,
   Sparkles,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
   deleteDoc,
   doc,
   query,
   where
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+
+// --- NEW IMPORTS ---
+import Motivation from '../components/Motivation';
+import GoalTracker from '../components/GoalTracker';
+import MoodTracker from '../components/MoodTracker';
+// --- END NEW IMPORTS ---
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
@@ -199,7 +205,7 @@ export default function Dashboard() {
     <div className="black-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
         
-        {/* Header */}
+        {/* Header, Stats, and Mood Tracker */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -228,8 +234,8 @@ export default function Dashboard() {
                 }}>
                   Your Pulse
                 </h1>
-          <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-                {userName || currentUser?.email}
+            <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
+                  {userName || currentUser?.email}
                 </p>
               </div>
             </div>
@@ -264,7 +270,24 @@ export default function Dashboard() {
               <div className="stats-card-label">Active Habits</div>
             </div>
           </div>
+
+          {/* --- NEW MOOD TRACKER --- */}
+          <MoodTracker />
+          {/* --- END MOOD TRACKER --- */}
+
         </motion.div>
+
+        {/* --- NEW MOTIVATION COMPONENT --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Motivation />
+        </motion.div>
+        {/* --- END MOTIVATION COMPONENT --- */}
+
+
         {/* Calendar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -273,6 +296,19 @@ export default function Dashboard() {
           
           <Calendar habits={habits} />
         </motion.div>
+
+        {/* --- NEW GOAL TRACKER --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          {/* Pass the totalStreak as a prop */}
+          <GoalTracker totalStreak={totalStreak} />
+        </motion.div>
+        {/* --- END GOAL TRACKER --- */}
+
+
         {/* Add Habit Button */}
         <motion.div
           initial={{ opacity: 0 }}
