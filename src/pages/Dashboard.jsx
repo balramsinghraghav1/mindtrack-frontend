@@ -23,7 +23,6 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-
 import Stats from '../components/Stats';
 import Calendar from '../components/Calendar';
 import FriendsList from '../components/FriendsList';
@@ -47,7 +46,6 @@ export default function Dashboard() {
 
   async function loadHabits() {
     if (!currentUser) return;
-
     try {
       const q = query(
         collection(db, 'habits'),
@@ -58,13 +56,11 @@ export default function Dashboard() {
         id: doc.id,
         ...doc.data()
       }));
-
       habitsData.sort((a, b) => {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
         return dateB - dateA;
       });
-
       setHabits(habitsData);
     } catch (error) {
       console.error('Error loading habits:', error);
@@ -75,7 +71,6 @@ export default function Dashboard() {
   async function addHabit(e) {
     e.preventDefault();
     if (!newHabit.trim()) return;
-
     try {
       const habitData = {
         name: newHabit,
@@ -84,7 +79,6 @@ export default function Dashboard() {
         streak: 0,
         createdAt: new Date().toISOString()
       };
-
       const docRef = await addDoc(collection(db, 'habits'), habitData);
       setHabits([{ id: docRef.id, ...habitData }, ...habits]);
       setNewHabit('');
@@ -102,7 +96,6 @@ export default function Dashboard() {
         streak: 0,
         createdAt: new Date().toISOString()
       };
-
       const docRef = await addDoc(collection(db, 'habits'), habitData);
       setHabits([{ id: docRef.id, ...habitData }, ...habits]);
     } catch (error) {
@@ -113,10 +106,8 @@ export default function Dashboard() {
   async function toggleHabit(habit) {
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = habit.completedDates?.includes(today);
-
     let newCompletedDates;
     let newStreak = habit.streak || 0;
-
     if (isCompletedToday) {
       newCompletedDates = habit.completedDates.filter(date => date !== today);
       newStreak = Math.max(0, newStreak - 1);
@@ -124,14 +115,12 @@ export default function Dashboard() {
       newCompletedDates = [...(habit.completedDates || []), today];
       newStreak = calculateStreak(newCompletedDates);
     }
-
     try {
       const habitRef = doc(db, 'habits', habit.id);
       await updateDoc(habitRef, {
         completedDates: newCompletedDates,
         streak: newStreak
       });
-
       setHabits(habits.map(h =>
         h.id === habit.id
           ? { ...h, completedDates: newCompletedDates, streak: newStreak }
@@ -144,23 +133,19 @@ export default function Dashboard() {
 
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
-
     const sorted = [...dates].sort().reverse();
     let streak = 0;
     const today = new Date();
-
     for (let i = 0; i < sorted.length; i++) {
       const date = new Date(sorted[i]);
       const expectedDate = new Date(today);
       expectedDate.setDate(today.getDate() - i);
-
       if (date.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
         streak++;
       } else {
         break;
       }
     }
-
     return streak;
   }
 
@@ -202,8 +187,6 @@ export default function Dashboard() {
   return (
     <div className="black-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
-
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -251,8 +234,6 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-
-          {/* Stats */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -264,13 +245,11 @@ export default function Dashboard() {
               <div className="stats-card-value">{completedToday}/{habits.length}</div>
               <div className="stats-card-label">Today</div>
             </div>
-
             <div className="stats-card">
               <Flame size={28} color="#ec4899" />
               <div className="stats-card-value">{totalStreak}</div>
               <div className="stats-card-label">Total Streak</div>
             </div>
-
             <div className="stats-card">
               <CalendarIcon size={28} color="#06b6d4" />
               <div className="stats-card-value">{habits.length}</div>
@@ -278,8 +257,6 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-
-        {/* Stats Component (in place of Calendar) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -293,8 +270,6 @@ export default function Dashboard() {
             Tap to see progress in Calendar
           </button>
         </motion.div>
-
-        {/* Add Habit Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -347,8 +322,6 @@ export default function Dashboard() {
             </motion.form>
           )}
         </motion.div>
-
-        {/* Habits List */}
         <AnimatePresence>
           {habits.length === 0 ? (
             <motion.div
@@ -376,7 +349,6 @@ export default function Dashboard() {
           ) : (
             habits.map((habit, index) => {
               const isCompletedToday = habit.completedDates?.includes(today);
-
               return (
                 <motion.div
                   key={habit.id}
@@ -390,7 +362,6 @@ export default function Dashboard() {
                     className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
                     onClick={() => toggleHabit(habit)}
                   />
-
                   <div style={{ flex: 1 }}>
                     <h3 style={{
                       fontSize: '1.1rem',
@@ -411,7 +382,6 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
-
                   <button
                     onClick={() => deleteHabit(habit.id)}
                     style={{
@@ -442,8 +412,6 @@ export default function Dashboard() {
             })
           )}
         </AnimatePresence>
-
-        {/* Modal for Calendar */}
         {showCalendar && (
           <div className="modal-overlay">
             <div className="modal-content">
@@ -452,8 +420,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* Modal for FriendsList */}
         {showFriends && (
           <div className="modal-overlay">
             <div className="modal-content">
@@ -462,10 +428,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
       </div>
-
-      {/* AI Chatbot */}
       <AIChatbot
         currentHabits={habits.map(h => h.name)}
         onAddHabit={addHabitFromAI}
@@ -473,7 +436,6 @@ export default function Dashboard() {
     </div>
   );
 }
-
 
 
 
