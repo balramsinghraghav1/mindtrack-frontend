@@ -1,11 +1,11 @@
 .mood-tracker-container {
   padding-top: 1.5rem;
-  margin-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1.5rem; /* Reduced margin */
+  border-top: 1px solid var(--border-color); /* Lighter separator */
 }
 
 .mood-title {
-  color: #e5e7eb;
+  color: var(--text-color-primary);
   font-weight: 600;
   font-size: 1.1rem;
   text-align: center;
@@ -16,28 +16,29 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
+  gap: 0.5rem; /* Added gap */
 }
 
 .mood-emoji-btn {
   background: none;
   border: 2px solid transparent;
-  font-size: 2.25rem; /* Large emojis */
+  font-size: 2.25rem;
   cursor: pointer;
   border-radius: 50%;
-  padding: 0.5rem;
+  padding: 0.4rem; /* Slightly reduced padding */
   line-height: 1;
   transition: all 0.2s ease-in-out;
+  flex-shrink: 0; /* Prevent emojis from shrinking on small screens */
 }
 
 .mood-emoji-btn:hover {
   transform: scale(1.15);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05); /* Soft hover background */
 }
 
 .mood-emoji-btn.selected {
-  /* Highlight selected emoji with your theme color */
-  border-color: #9333ea;
+  border-color: var(--accent-yellow); /* Highlight with yellow */
   transform: scale(1.1);
-  background-color: rgba(147, 51, 234, 0.2);
-  box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+  background-color: rgba(255, 193, 7, 0.2); /* Soft yellow background */
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.4); /* Yellow glow */
 }
