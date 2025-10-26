@@ -1,0 +1,218 @@
+/* Main container for the new, non-glass look */
+.calendar-container {
+  background: #1a1a1a; /* A base dark color from your theme */
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+/* Header: "Activity Calendar" */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calendar-title h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+/* Month Navigation: < Month Year > */
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: #111; /* Even darker for contrast */
+  border-radius: 12px;
+  border: 1px solid rgba(147, 51, 234, 0.2);
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: #9333ea;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background: rgba(147, 51, 234, 0.1);
+}
+
+.nav-month {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Day Names: Sun, Mon, Tue... */
+.day-names-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.day-name {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #a1a1aa; /* Muted color */
+  padding: 0.5rem;
+}
+
+/* Calendar Grid: All the day cells */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Aligns number to top */
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: #222; /* Darker than main bg */
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+}
+
+.day-number {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #a1a1aa;
+}
+
+/* Styling for completed days */
+.calendar-day.completed {
+  background: rgba(147, 51, 234, 0.1);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+}
+
+.calendar-day.completed .day-number {
+  color: #e5e7eb; /* Brighter number */
+}
+
+/* Styling for today */
+.calendar-day.today {
+  border: 2px solid #9333ea;
+  box-shadow: 0 0 15px rgba(147, 51, 234, 0.3);
+}
+
+.calendar-day.today .day-number {
+  font-weight: 700;
+  color: white;
+}
+
+/* --- NEW DOTS --- */
+.completion-dots-container {
+  display: flex;
+  gap: 3px;
+  position: absolute;
+  bottom: 8px; /* Position at the bottom */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.completion-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #ec4899; /* Pink from your theme */
+  box-shadow: 0 0 5px rgba(236, 72, 153, 0.7);
+}
+/* --- END NEW DOTS --- */
+
+
+/* Legend at the bottom */
+.calendar-legend {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: #111;
+  border-radius: 12px;
+  border: 1px solid rgba(147, 51, 234, 0.2);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-label {
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.legend-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.today-swatch {
+  background: #222;
+  border: 2px solid #9333ea;
+}
+
+.activity-swatch {
+  background: rgba(147, 51, 234, 0.1);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  /* Show dots inside the swatch */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* Add dots to the legend swatch for clarity */
+.activity-swatch::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #ec4899;
+}
+.activity-swatch::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #ec4899;
+}
