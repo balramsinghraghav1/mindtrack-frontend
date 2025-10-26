@@ -9,7 +9,7 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm your Pulse AI assistant. 🌊 I can help you find habits that sync with your bio rhythm. What are your wellness goals?"
+      content: "Hi! I'm your Pulse AI assistant. 🌊 I can help you find habits that sync with your bio rhythm. Ask me for habit suggestions!"
     }
   ]);
   const [input, setInput] = useState('');
@@ -35,37 +35,60 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
 
     try {
       const context = currentHabits.length > 0
-        ? `User currently tracks these habits: ${currentHabits.join(', ')}. `
+        ? `User currently tracks: ${currentHabits.join(', ')}. `
         : '';
 
-      const prompt = `${context}You are a wellness coach specializing in bio rhythms and habit formation. User asks: "${userMessage}". 
-      
-      Provide a helpful, concise response (2-3 sentences). If suggesting habits, format as:
-      "I recommend: [Habit Name]" so the user can easily add it.`;
+      const prompt = `${context}You are a wellness coach. User asks: "${userMessage}". Give a brief response (2-3 sentences). If suggesting a habit, write "I recommend: [habit name]"`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             contents: [{
-              parts: [{ text: prompt }]
-            }]
+              parts: [{
+                text: prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 200
+            }
           })
         }
       );
 
-      const data = await response.json();
-      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-                         "I'm having trouble connecting. Try asking about habit suggestions for sleep, energy, or focus!";
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
 
-      setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        const aiResponse = data.candidates[0].content.parts[0].text;
+        setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+      } else {
+        throw new Error('Invalid response format');
+      }
+
     } catch (error) {
       console.error('AI Error:', error);
+      let errorMessage = "I'm having connection issues. ";
+      
+      if (error.message.includes('403')) {
+        errorMessage += "Please check if the API key is enabled for Gemini API.";
+      } else if (error.message.includes('429')) {
+        errorMessage += "Too many requests. Please wait a moment.";
+      } else {
+        errorMessage += "Try asking: 'Suggest a morning habit' or 'What habits help with sleep?'";
+      }
+      
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "Sorry, I'm having trouble connecting. Try asking about habit suggestions for sleep, energy, or focus!" 
+        content: errorMessage
       }]);
     }
 
@@ -75,14 +98,20 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
   function extractHabitFromMessage(message) {
     const patterns = [
       /I recommend:?\s*([^.!?\n]+)/i,
-      /suggest:?\s*([^.!?\n]+)/i,
-      /try:?\s*([^.!?\n]+)/i
+      /suggest(?:ion)?:?\s*([^.!?\n]+)/i,
+      /try:?\s*([^.!?\n]+)/i,
+      /consider:?\s*([^.!?\n]+)/i
     ];
 
     for (const pattern of patterns) {
       const match = message.match(pattern);
       if (match) {
-        return match[1].trim().replace(/['"]/g, '');
+        let habit = match[1].trim();
+        // Clean up common artifacts
+        habit = habit.replace(/["'`]/g, '');
+        habit = habit.replace(/\*\*/g, '');
+        habit = habit.split(/[.!?]/)[0]; // Take first sentence
+        return habit.trim();
       }
     }
     return null;
@@ -262,6 +291,41 @@ export default function AIChatbot({ currentHabits, onAddHabit }) {
               )}
 
               <div ref={messagesEndRef} />
+            </div>
+
+            {/* Quick Actions */}
+            <div style={{
+              padding: '0.5rem 1rem',
+              borderTop: '1px solid rgba(147, 51, 234, 0.2)',
+              display: 'flex',
+              gap: '0.5rem',
+              flexWrap: 'wrap'
+            }}>
+              {[
+                'Suggest morning habit',
+                'Help with sleep',
+                'Energy boost ideas'
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => {
+                    setInput(suggestion);
+                  }}
+                  type="button"
+                  style={{
+                    padding: '4px 10px',
+                    background: 'rgba(147, 51, 234, 0.1)',
+                    border: '1px solid rgba(147, 51, 234, 0.3)',
+                    borderRadius: '12px',
+                    color: '#9333ea',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {suggestion}
+                </button>
+              ))}
             </div>
 
             {/* Input */}
