@@ -48,16 +48,22 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      
       if (user) {
+        // Force reload user to get latest displayName
+        await user.reload();
+        
         // Try to get name from profile first
         if (user.displayName) {
           setUserName(user.displayName);
+          setLoading(false);
         } else {
           // Fallback: get from Firestore
           try {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-              setUserName(userDoc.data().name || user.email);
+            if (userDoc.exists() && userDoc.data().name) {
+              setUserName(userDoc.data().name);
             } else {
               setUserName(user.email);
             }
@@ -65,10 +71,11 @@ export function AuthProvider({ children }) {
             console.error('Error fetching user name:', error);
             setUserName(user.email);
           }
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
-      setCurrentUser(user);
-      setLoading(false);
     });
 
     return unsubscribe;
