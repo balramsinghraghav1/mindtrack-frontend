@@ -1,41 +1,41 @@
-import Calendar from '../components/Calendar.jsx';
-import AIChatbot from '../components/AIChatbot.jsx';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Activity,
-  Plus, 
-  Check, 
-  Trash2, 
-  LogOut, 
+  Plus,
+  Check,
+  Trash2,
+  LogOut,
   Flame,
   Sparkles,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
   deleteDoc,
   doc,
   query,
   where
 } from 'firebase/firestore';
-import { db } from '../firebase/config.js';
+import { db } from '../firebase/config';
 
-// --- NEW IMPORTS ---
-import Stats from '../components/Stats.jsx';
-import FriendsList from '../components/FriendsList.jsx';
-// --- END NEW IMPORTS ---
+import Stats from '../components/Stats';
+import Calendar from '../components/Calendar';
+import FriendsList from '../components/FriendsList';
+import AIChatbot from '../components/AIChatbot';
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
   const { currentUser, userName, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -47,7 +47,7 @@ export default function Dashboard() {
 
   async function loadHabits() {
     if (!currentUser) return;
-    
+
     try {
       const q = query(
         collection(db, 'habits'),
@@ -58,13 +58,13 @@ export default function Dashboard() {
         id: doc.id,
         ...doc.data()
       }));
-      
+
       habitsData.sort((a, b) => {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
         return dateB - dateA;
       });
-      
+
       setHabits(habitsData);
     } catch (error) {
       console.error('Error loading habits:', error);
@@ -84,7 +84,6 @@ export default function Dashboard() {
         streak: 0,
         createdAt: new Date().toISOString()
       };
-      
 
       const docRef = await addDoc(collection(db, 'habits'), habitData);
       setHabits([{ id: docRef.id, ...habitData }, ...habits]);
@@ -114,13 +113,13 @@ export default function Dashboard() {
   async function toggleHabit(habit) {
     const today = new Date().toISOString().split('T')[0];
     const isCompletedToday = habit.completedDates?.includes(today);
-    
+
     let newCompletedDates;
     let newStreak = habit.streak || 0;
 
     if (isCompletedToday) {
       newCompletedDates = habit.completedDates.filter(date => date !== today);
-      newStreak = Math.max(0, newStreak - 1); // This logic might need refinement for perfect streak tracking
+      newStreak = Math.max(0, newStreak - 1);
     } else {
       newCompletedDates = [...(habit.completedDates || []), today];
       newStreak = calculateStreak(newCompletedDates);
@@ -133,8 +132,8 @@ export default function Dashboard() {
         streak: newStreak
       });
 
-      setHabits(habits.map(h => 
-        h.id === habit.id 
+      setHabits(habits.map(h =>
+        h.id === habit.id
           ? { ...h, completedDates: newCompletedDates, streak: newStreak }
           : h
       ));
@@ -145,44 +144,23 @@ export default function Dashboard() {
 
   function calculateStreak(dates) {
     if (!dates || dates.length === 0) return 0;
-    
-    // Get unique dates, convert to Date objects, and sort descending
-    const sortedDates = [...new Set(dates)].map(d => new Date(d)).sort((a, b) => b - a);
-    
+
+    const sorted = [...dates].sort().reverse();
     let streak = 0;
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today
 
-    // Check if today or yesterday is the most recent completion
-    const mostRecent = sortedDates[0];
-    mostRecent.setHours(0, 0, 0, 0);
+    for (let i = 0; i < sorted.length; i++) {
+      const date = new Date(sorted[i]);
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
 
-    const diffDays = (today.getTime() - mostRecent.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (diffDays > 1) return 0; // Streak broken
-
-    let currentDate = new Date(today);
-    if (diffDays === 1) { // Most recent was yesterday
-        currentDate.setDate(currentDate.getDate() - 1);
+      if (date.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
+        streak++;
+      } else {
+        break;
+      }
     }
-    
-    currentDate.setHours(0,0,0,0);
 
-    for (const date of sortedDates) {
-        const normalizedDate = new Date(date);
-        normalizedDate.setHours(0, 0, 0, 0);
-
-        if (normalizedDate.getTime() === currentDate.getTime()) {
-            streak++;
-            // Move to the previous day
-            currentDate.setDate(currentDate.getDate() - 1);
-        } else if (normalizedDate < currentDate) {
-            // Gap in dates
-            break;
-        }
-        // If normalizedDate > currentDate, it's a future date or duplicate, ignore
-    }
-    
     return streak;
   }
 
@@ -206,11 +184,11 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="black-bg" style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
+      <div className="black-bg" style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
         <div className="loading-wave">
           <span></span>
@@ -224,7 +202,7 @@ export default function Dashboard() {
   return (
     <div className="black-bg">
       <div className="container" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem' }}>
-        
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -232,9 +210,9 @@ export default function Dashboard() {
           className="glass-card"
           style={{ marginBottom: '2rem' }}
         >
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '1rem'
@@ -242,8 +220,8 @@ export default function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <Activity size={48} color="#9333ea" className="pulse-icon" />
               <div>
-                <h1 style={{ 
-                  fontSize: '2.5rem', 
+                <h1 style={{
+                  fontSize: '2.5rem',
                   fontWeight: '800',
                   background: 'linear-gradient(135deg, #9333ea, #ec4899)',
                   WebkitBackgroundClip: 'text',
@@ -254,20 +232,29 @@ export default function Dashboard() {
                 }}>
                   Your Pulse
                 </h1>
-          <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
+                <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
                   {userName || currentUser?.email}
                 </p>
               </div>
             </div>
-            <button onClick={handleLogout} className="neon-button">
-              <LogOut size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-              Logout
-            </button>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={handleLogout} className="neon-button">
+                <LogOut size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                Logout
+              </button>
+              <button
+                className="neon-button"
+                style={{ marginLeft: '0' }}
+                onClick={() => setShowFriends(true)}
+              >
+                Share
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
-          <div style={{ 
-            display: 'grid', 
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
             gap: '1rem',
             marginTop: '2rem'
@@ -277,7 +264,7 @@ export default function Dashboard() {
               <div className="stats-card-value">{completedToday}/{habits.length}</div>
               <div className="stats-card-label">Today</div>
             </div>
-            
+
             <div className="stats-card">
               <Flame size={28} color="#ec4899" />
               <div className="stats-card-value">{totalStreak}</div>
@@ -291,14 +278,22 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-        {/* Calendar */}
+
+        {/* Stats Component (in place of Calendar) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}>
-          
-          <Calendar habits={habits} />
+          <Stats habits={habits} />
+          <button
+            className="neon-button"
+            style={{ margin: '1rem 0' }}
+            onClick={() => setShowCalendar(true)}
+          >
+            Tap to see progress in Calendar
+          </button>
         </motion.div>
+
         {/* Add Habit Button */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -353,20 +348,6 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* --- NEW: Stats / Trends Component --- */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          style={{ marginBottom: '1.5rem' }}
-        >
-          {/* We use a glass-card wrapper for consistent styling */}
-          <div className="glass-card">
-            <Stats habits={habits} />
-          </div>
-        </motion.div>
-        {/* --- END NEW --- */}
-
         {/* Habits List */}
         <AnimatePresence>
           {habits.length === 0 ? (
@@ -377,8 +358,8 @@ export default function Dashboard() {
               style={{ textAlign: 'center', padding: '3rem' }}
             >
               <Sparkles size={64} color="#9333ea" style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-              <h3 style={{ 
-                fontSize: '1.75rem', 
+              <h3 style={{
+                fontSize: '1.75rem',
                 marginBottom: '0.75rem',
                 background: 'linear-gradient(135deg, #9333ea, #ec4899)',
                 WebkitBackgroundClip: 'text',
@@ -395,7 +376,7 @@ export default function Dashboard() {
           ) : (
             habits.map((habit, index) => {
               const isCompletedToday = habit.completedDates?.includes(today);
-              
+
               return (
                 <motion.div
                   key={habit.id}
@@ -409,10 +390,10 @@ export default function Dashboard() {
                     className={`habit-checkbox ${isCompletedToday ? 'checked' : ''}`}
                     onClick={() => toggleHabit(habit)}
                   />
-                  
+
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ 
-                      fontSize: '1.1rem', 
+                    <h3 style={{
+                      fontSize: '1.1rem',
                       fontWeight: '600',
                       textDecoration: isCompletedToday ? 'line-through' : 'none',
                       opacity: isCompletedToday ? 0.7 : 1,
@@ -421,7 +402,7 @@ export default function Dashboard() {
                       {habit.name}
                     </h3>
                     {habit.streak > 0 && (
-                      <div className="streak-badge" style={{ 
+                      <div className="streak-badge" style={{
                         display: 'inline-flex',
                         marginTop: '0.5rem'
                       }}>
@@ -461,29 +442,38 @@ export default function Dashboard() {
             })
           )}
         </AnimatePresence>
+
+        {/* Modal for Calendar */}
+        {showCalendar && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <button onClick={() => setShowCalendar(false)} className="close-button">Close</button>
+              <Calendar habits={habits} />
+            </div>
+          </div>
+        )}
+
+        {/* Modal for FriendsList */}
+        {showFriends && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <button onClick={() => setShowFriends(false)} className="close-button">Close</button>
+              <FriendsList />
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* AI Chatbot */}
-      <AIChatbot 
+      <AIChatbot
         currentHabits={habits.map(h => h.name)}
         onAddHabit={addHabitFromAI}
       />
-
-      {/* --- NEW: Friends List Component --- */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="container" // Use container to constrain width
-        style={{ paddingBottom: '2rem', paddingTop: '1.5rem' }} // Add some spacing
-      >
-        <FriendsList />
-      </motion.div>
-      {/* --- END NEW --- */}
-
     </div>
   );
 }
+
 
 
 
