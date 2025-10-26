@@ -31,7 +31,7 @@ export default function Dashboard() {
   const [newHabit, setNewHabit] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const { currentUser, logout } = useAuth();
+  const { currentUser, userName, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -228,8 +228,8 @@ export default function Dashboard() {
                 }}>
                   Your Pulse
                 </h1>
-                <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-                  {currentUser?.email}
+          <p style={{ color: '#a1a1aa', marginTop: '0.25rem', fontSize: '0.95rem' }}>
+                {userName || currentUser?.email}
                 </p>
               </div>
             </div>
